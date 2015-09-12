@@ -22,10 +22,11 @@ def chromosomes_with_SNPs_plot(chr_lengths, snp_groups_dict):
     ax.set_xlim([0, max_len * 1.05])
     ax.set_xlabel("Posición (Mb)")
     ax.set_ylabel("Cromosoma")
+    ax.invert_yaxis()
 
     yinterval = 10**7
     ax.set_xticks(np.arange(0, max_len + yinterval, yinterval) // 1)
     ax.set_xticklabels(np.arange(0, max_len + yinterval, yinterval) // 10**6)
-    ax.legend()
+    ax.legend(loc='best')
 
     return ax
