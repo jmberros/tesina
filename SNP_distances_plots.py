@@ -8,7 +8,7 @@ from data_munging.distances_between_AIMs import snp_distances_stats
 from helpers.data_munging_functions import annotate_bars
 
 
-def _snp_distances(galanter, present):
+def snp_distances(galanter, present):
     galanter_snp_distances = snp_distances_per_chromosome(galanter)
     galanter_snp_distances_stats = snp_distances_stats(galanter_snp_distances)
 
@@ -27,7 +27,7 @@ def _snp_distances(galanter, present):
 
 
 def galanter_vs_present_mean_distance_plot(galanter, present):
-    df = _snp_distances(galanter, present)
+    df = snp_distances(galanter, present)
     df = df[['mean_distance_galanter', 'mean_distance_present']]
 
     ax = df.plot(kind='bar', rot=0, width=0.75, colormap=cm.coolwarm_r,
@@ -49,7 +49,7 @@ def galanter_vs_present_mean_distance_plot(galanter, present):
 
 
 def galanter_vs_present_median_distance_plot(galanter, present):
-    df = _snp_distances(galanter, present)
+    df = snp_distances(galanter, present)
     df = df[['median_distance_galanter', 'median_distance_present']]
 
     ax = df.plot(kind="bar", rot=0, colormap=cm.coolwarm_r, alpha=0.65,
