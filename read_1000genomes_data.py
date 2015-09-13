@@ -1,7 +1,9 @@
 import vcf
 import itertools
 import pandas as pd
+from glob import glob
 from helpers.data_munging_functions import remove_unnecessary_lists_from_df
+from collections import defaultdict, OrderedDict
 
 
 def _vcf_records(vcf_filename):
@@ -46,3 +48,47 @@ def create_1000genomes_df_from_vcf(vcf_filenames):
     df_1000genomes = remove_unnecessary_lists_from_df(df_1000genomes)
 
     return df_1000genomes
+
+
+def snp_samples_to_pop_freqs(snp_genotypes, samples_df):
+    """Takes list of genotypes (associated with one SNP) and a samples
+    dataframe with population info per sample ID. Returns population statistics
+    for that SNP in a dict like:
+    { population_1 : ref_allele_frequency, population_2: ... }"""
+
+    allele_count = defaultdict(lambda: [0, 0])
+    gt_codes = {0: 'ref_homocygote', 1: 'heterocygote', 2: 'alt_homocygote'}
+
+    for sample_name, genotype_code in snp_genotypes:
+        population = samples_df.loc[sample_name].population
+        if gt_codes[genotype_code] == 'ref_homocygote':
+            allele_count[population][0] += 2
+        elif gt_codes[genotype_code] == 'heterocygote':
+            allele_count[population][0] += 1
+            allele_count[population][1] += 1
+        elif gt_codes[genotype_code] == 'alt_homocygote':
+            allele_count[population][1] += 2
+
+    freq = {}
+    for population, (ref_allele_count, alt_allele_count) in allele_count.items():
+        total_alleles = ref_allele_count + alt_allele_count
+        freq[population] = round(ref_allele_count / total_alleles, 2)
+
+    return freq
+
+
+def create_1000genomes_frequencies_df(df_1000genomes, samples_df):
+    subpop_freqs_series = df_1000genomes['samples_genotypes'].apply(
+        lambda samples_gt: snp_samples_to_pop_freqs(samples_gt, samples_df)
+    )
+    subpop_freqs = pd.DataFrame(subpop_freqs_series.values.tolist(),
+                                index=subpop_freqs_series.index)
+    superpop_freqs = df_1000genomes.filter(regex="AF")
+    superpop_freqs = superpop_freqs.applymap(lambda x: round(x, 2))
+
+    frequencies_1000g = pd.concat([subpop_freqs, superpop_freqs], axis=1)
+    frequencies_1000g = frequencies_1000g.rename(columns={
+        'AFR_AF': 'AFR', 'AMR_AF': 'AMR', 'EAS_AF': 'EAS',
+        'EUR_AF': 'EUR', 'SAS_AF': 'SAS'})
+
+    return frequencies_1000g
