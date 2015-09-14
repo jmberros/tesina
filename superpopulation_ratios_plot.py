@@ -6,10 +6,10 @@ from helpers.data_munging_functions import annotate_bars
 def superpopulation_ratios_plot(df1, df2):
     """Expects dataframes of SNPs with a 'population' field"""
     population_ratios = pd.DataFrame({
-        "$Galanter_{total}$": (df1.population.value_counts() /
+        "$Galanter_{TOTAL}$": (df1.population.value_counts() /
                                df1.population.count()),
-        "$Galanter_{LAT-1}$": (df2.population.value_counts() /
-                               df2.population.count()),
+        "$Galanter_{IN}$": (df2.population.value_counts() /
+                            df2.population.count()),
     })
     print(population_ratios)
 
@@ -23,7 +23,7 @@ def superpopulation_ratios_plot(df1, df2):
 
     # Hardcoded title and legend
     ax.set_title("Proporción de AIMs de cada población\n" +
-                 "en $Galanter_{total}$ vs. $Galanter_{LAT-1}$", y=1.025)
+                 "en $Galanter_{TOTAL}$ vs. $Galanter_{IN}$", y=1.025)
     ax.legend(loc='best')
 
     return ax
@@ -32,8 +32,8 @@ def superpopulation_ratios_plot(df1, df2):
 def superpopulation_count_plot(df1, df2):
     """Expects dataframes of SNPs with a 'population' field"""
     population_count = pd.DataFrame({
-        "$Galanter_{Ausentes}$": df1.population.value_counts(),
-        "$Galanter_{LAT-1}$": df2.population.value_counts(),
+        "$Galanter_{OUT}$": df1.population.value_counts(),
+        "$Galanter_{IN}$": df2.population.value_counts(),
     })
     print(population_count)
 
@@ -46,8 +46,7 @@ def superpopulation_count_plot(df1, df2):
     ax.set_xlabel("Población")
 
     # Hardcoded title
-    ax.set_title("Galanter AIMs presentes vs. ausentes\nen LAT-1, " +
-                 "por población", y=1.025)
+    ax.set_title("$Galanter_{IN}$ vs. $Galanter_{OUT}$", y=1.025)
     ax.legend(loc='best', fontsize=14)
 
     return ax
