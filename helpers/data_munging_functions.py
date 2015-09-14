@@ -15,6 +15,10 @@ def annotate_bars(ax, base=1, decimals=1, suffix='', fontsize=12):
     return texts
 
 
+def remove_unkown_snp_subtypes(df):
+    return df[df.var_subtype != 'unknown']
+
+
 def remove_unnecessary_lists_from_df(df):
     df = df.copy()
 
@@ -24,7 +28,7 @@ def remove_unnecessary_lists_from_df(df):
 
         # Drop empty lists
         if all([len(e) == 0 for e in s]):
-            df.drop(field_name, axis=1)
+            df = df.drop(field_name, axis=1)
 
         # Remove unncessary list wrapping of [just one element]
         if all([len(e) == 1 for e in s]):
