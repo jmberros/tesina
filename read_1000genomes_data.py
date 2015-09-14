@@ -1,9 +1,12 @@
 import vcf
 import itertools
 import pandas as pd
+
+from os.path import isfile
 from glob import glob
 from helpers.data_munging_functions import remove_unnecessary_lists_from_df
-from collections import defaultdict, OrderedDict
+from helpers.data_munging_functions import remove_unkown_snp_subtypes
+from collections import defaultdict
 
 
 def _vcf_records(vcf_filename):
@@ -33,7 +36,7 @@ def _vcf_to_dataframe(filename):
     return df
 
 
-def create_1000genomes_df_from_vcf(vcf_filenames):
+def _create_1000genomes_df_from_vcf_files(vcf_filenames):
     """Read the SNP that have been extracted to vcf files and create a
     dataframe with the data"""
 
@@ -45,9 +48,21 @@ def create_1000genomes_df_from_vcf(vcf_filenames):
     df_1000genomes = pd.DataFrame(records_as_dictionaries).set_index('ID')
     df_1000genomes = df_1000genomes.dropna(axis=1)
     df_1000genomes = df_1000genomes.drop('FILTER', axis=1)
+    df_1000genomes = remove_unkown_snp_subtypes(df_1000genomes)
     df_1000genomes = remove_unnecessary_lists_from_df(df_1000genomes)
 
     return df_1000genomes
+
+
+def get_or_create_1000genomes_df(dumpfile):
+    if isfile(dumpfile):
+        return pd.read_csv(dumpfile, index_col='ID')
+
+    vcf_filenames = glob("/home/juan/tesina/1000genomes/chr_*recode*")
+    df = _create_1000genomes_df_from_vcf_files(vcf_filenames)
+    df.to_csv(dumpfile)
+
+    return df
 
 
 def snp_samples_to_pop_freqs(snp_genotypes, samples_df):
@@ -77,7 +92,7 @@ def snp_samples_to_pop_freqs(snp_genotypes, samples_df):
     return freq
 
 
-def create_1000genomes_frequencies_df(df_1000genomes, samples_df):
+def _create_1000genomes_frequencies_df(df_1000genomes, samples_df):
     subpop_freqs_series = df_1000genomes['samples_genotypes'].apply(
         lambda samples_gt: snp_samples_to_pop_freqs(samples_gt, samples_df)
     )
@@ -92,3 +107,10 @@ def create_1000genomes_frequencies_df(df_1000genomes, samples_df):
         'EUR_AF': 'EUR', 'SAS_AF': 'SAS'})
 
     return frequencies_1000g
+
+
+def get_or_create_1000g_frequencies_df(dumpfile, df_1000genomes, samples_df):
+    if isfile(dumpfile):
+        return pd.read_csv(dumpfile, index_col='ID')
+
+    return _create_1000genomes_frequencies_df(df_1000genomes, samples_df)
