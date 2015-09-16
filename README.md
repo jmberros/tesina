@@ -1,2 +1,4 @@
-# tesina
-Noteboo y scripts para la tesina: AIMs del panel de Galanter y análisis de los SNPs presentes en Affy LAT-1.
+# Tesina
+
+
+Notebook y Python scripts para la tesina. Análisis de AIMs del panel de Galanter presentes vs. ausentes en el chip de Affymetrix LAT 1. 
