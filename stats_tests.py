@@ -1,4 +1,5 @@
 from scipy.stats import ttest_ind, normaltest
+from collections import namedtuple
 
 
 def t_test(series1, series2):
@@ -6,8 +7,13 @@ def t_test(series1, series2):
     [s.dropna(axis=0, how='any', inplace=True) for s in [series1, series2]]
 
     t_critical, p_value = ttest_ind(series1, series2)
-    return "t-critico = {:.5f}".format(t_critical), \
-           "p-value = {:.5f}".format(p_value)
+    return ttest_namedtuple(t_critical, p_value)
+    # return "t-critico = {:.5f}".format(t_critical), \
+    # "p-value = {:.5f}".format(p_value)
+
+
+def ttest_namedtuple(t, p):
+    return namedtuple('t_test', 't p')(t, p)
 
 
 def n_test(series):
