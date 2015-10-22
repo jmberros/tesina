@@ -37,12 +37,11 @@ def _vcf_to_dataframe(filename):
 
 
 def _create_1000genomes_df_from_vcf_files(vcf_filenames):
-    """Read the SNP that have been extracted to vcf files and create a
-    dataframe with the data"""
+    """Read the SNPs that have been extracted to vcf files and create a
+    dataframe with the data."""
 
     records = [_vcf_records(vcf_filename) for vcf_filename in vcf_filenames]
-    # Flattens the list of lists:
-    records = itertools.chain.from_iterable(records)
+    records = itertools.chain.from_iterable(records)  # Flattens list of lists
     records_as_dictionaries = [_vcf_record_to_dict(r) for r in records]
 
     df_1000genomes = pd.DataFrame(records_as_dictionaries).set_index('ID')
@@ -54,11 +53,10 @@ def _create_1000genomes_df_from_vcf_files(vcf_filenames):
     return df_1000genomes
 
 
-def get_or_create_1000genomes_df(dumpfile):
+def get_or_create_1000genomes_df(dumpfile, vcf_filenames):
     if isfile(dumpfile):
         return pd.read_csv(dumpfile, index_col='ID')
 
-    vcf_filenames = glob("/home/juan/tesina/1000genomes/chr_*recode*")
     df = _create_1000genomes_df_from_vcf_files(vcf_filenames)
     df.to_csv(dumpfile)
 
@@ -87,7 +85,7 @@ def snp_samples_to_pop_freqs(snp_genotypes, samples_df):
     freq = {}
     for population, (ref_allele_count, alt_allele_count) in allele_count.items():
         total_alleles = ref_allele_count + alt_allele_count
-        freq[population] = round(ref_allele_count / total_alleles, 2)
+        freq[population] = round(alt_allele_count / total_alleles, 2)
 
     return freq
 
@@ -99,7 +97,7 @@ def _create_1000genomes_frequencies_df(df_1000genomes, samples_df):
     subpop_freqs = pd.DataFrame(subpop_freqs_series.values.tolist(),
                                 index=subpop_freqs_series.index)
     superpop_freqs = df_1000genomes.filter(regex="AF")
-    superpop_freqs = superpop_freqs.applymap(lambda x: round(x, 2))
+    superpop_freqs = superpop_freqs.applymap(lambda x: 1 - round(x, 2))
 
     frequencies_1000g = pd.concat([subpop_freqs, superpop_freqs], axis=1)
     frequencies_1000g = frequencies_1000g.rename(columns={
