@@ -82,7 +82,7 @@ def plot_PCAs(dataset_label, panels, genotypes_df, sample_populations_df,
     plt.tight_layout()
 
     # Ugly hack to get the legend in a different figure
-    set_empty_figure(fig_width, 1.5)
+    set_empty_figure(5, 2)
     plt.figlegend(scatters, pop_labels.unique(), loc='center', ncol=4)
 
     plt.show()
