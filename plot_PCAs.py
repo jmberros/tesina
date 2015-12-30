@@ -39,16 +39,19 @@ def plot_PCAs(dataset_label, panels, genotypes_df, sample_populations_df,
         for components in component_pairs_to_plot:
             ax_id = axes.pop()
             ax = fig.add_subplot(n_rows, n_cols, ax_id)
-            ax.set_title(dataset_label + "\n" + panel_label)
+            ax.set_title(panel_label)
 
             scatters = []
 
             for pop_label in pop_labels.unique():
                 # Convoluted way to filter the matrix rows
                 r = np.where(pop_labels == pop_label)[0]
+                marker = markers[pop_label]
+                lw = 0 if marker == 'o' else 1
+                z = 1 if marker == 'o' else 0
                 s = ax.scatter(X[r[0]:r[-1]+1, components[0]],
-                                X[r[0]:r[-1]+1, components[1]],
-                                marker=markers[pop_label], c=colors[pop_label])
+                                X[r[0]:r[-1]+1, components[1]], lw=lw,
+                                marker=marker, c=colors[pop_label], zorder=z)
                 scatters.append(s)
 
             if panel_label == list(panels.keys())[-1]:
@@ -80,6 +83,9 @@ def plot_PCAs(dataset_label, panels, genotypes_df, sample_populations_df,
         #  ax.set_zlabel("\nPC 3", linespacing=1)
 
     plt.tight_layout()
+    fig.suptitle("Dataset: " + dataset_label, fontsize=19, fontweight="bold",
+                 position=(0, 1), ha="left")
+    plt.subplots_adjust(top=0.85)
 
     # Ugly hack to get the legend in a different figure
     set_empty_figure(5, 2)
