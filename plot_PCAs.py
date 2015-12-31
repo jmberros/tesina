@@ -41,8 +41,6 @@ def plot_PCAs(dataset_label, panels, genotypes_df, sample_populations_df,
             ax = fig.add_subplot(n_rows, n_cols, ax_id)
             ax.set_title(panel_label)
 
-            scatters = []
-
             for pop_label in pop_labels.unique():
                 # Convoluted way to filter the matrix rows
                 r = np.where(pop_labels == pop_label)[0]
@@ -51,8 +49,14 @@ def plot_PCAs(dataset_label, panels, genotypes_df, sample_populations_df,
                 z = 1 if marker == 'o' else 0
                 s = ax.scatter(X[r[0]:r[-1]+1, components[0]],
                                 X[r[0]:r[-1]+1, components[1]], lw=lw,
+                                label=pop_label,
                                 marker=marker, c=colors[pop_label], zorder=z)
-                scatters.append(s)
+                ax.tick_params(axis="x", which="both", bottom="off", top="off",
+                               labelbottom="off")
+                ax.tick_params(axis="y", which="both", left="off", right="off",
+                               labelleft="off")
+                for spine in ax.spines.values():
+                    spine.set_edgecolor("silver")
 
             if panel_label == list(panels.keys())[-1]:
                 if invert_y:
@@ -69,6 +73,22 @@ def plot_PCAs(dataset_label, panels, genotypes_df, sample_populations_df,
             ax.set_ylabel("{}PC {}: Explica {}".format(ylabel_prefix,
                                                        components[1] + 1,
                                                        explained[components[1]]))
+            if ax_id % 2 != 0:
+                loc = "upper right"
+                dataset_tag = "".join([l[0] for l in dataset_label.split(", ")])
+                if dataset_tag in ["LE", "LEA"]:
+                    loc="lower right"
+                elif dataset_tag in ["L"]:
+                    loc="upper left"
+                elif dataset_tag in ["LEAC"]:
+                    loc="lower left"
+
+                # len(dataset_tag) is a hacky way of telling how many
+                # population groups there are in the dataset
+                ncol = 2 if len(dataset_tag) > 3 else 1
+                legend = ax.legend(fontsize=11, loc=loc, scatterpoints=1,
+                                   ncol=ncol)
+                legend.get_frame().set_edgecolor("silver")
 
         # Plot 3: 3D plot of PC 1 vs. PC 2 vs. PC 3
         #  ax_id = axes.pop()
@@ -91,11 +111,6 @@ def plot_PCAs(dataset_label, panels, genotypes_df, sample_populations_df,
     fig.suptitle("Dataset: " + dataset_label, fontsize=19, fontweight="bold",
                  position=(0, 1), ha="left")
     plt.subplots_adjust(top=0.85)
-
-    # Ugly hack to get the legend in a different figure
-    set_empty_figure(5, 2)
-    plt.figlegend(scatters, pop_labels.unique(), loc='center', ncol=4)
-
     plt.show()
 
 
