@@ -47,7 +47,7 @@ def plot_PCAs(dataset_label, panels, genotypes_df, sample_populations_df,
                 # Convoluted way to filter the matrix rows
                 r = np.where(pop_labels == pop_label)[0]
                 marker = markers[pop_label]
-                lw = 0 if marker == 'o' else 1
+                lw = 0 if marker in ['o', '.', 'D', 's'] else 1
                 z = 1 if marker == 'o' else 0
                 s = ax.scatter(X[r[0]:r[-1]+1, components[0]],
                                 X[r[0]:r[-1]+1, components[1]], lw=lw,
@@ -60,10 +60,15 @@ def plot_PCAs(dataset_label, panels, genotypes_df, sample_populations_df,
                 if invert_x:
                     ax.invert_xaxis()
 
-            ax.set_xlabel("PC {} – Explica {}".format(components[0] + 1,
-                                                      explained[components[0]]))
-            ax.set_ylabel("PC {} – Explica {}".format(components[1] + 1,
-                                                      explained[components[1]]))
+            ylabel_prefix = "–" if invert_y else ""
+            xlabel_prefix = "–" if invert_x else ""
+
+            ax.set_xlabel("{}PC {}: Explica {}".format(xlabel_prefix,
+                                                       components[0] + 1,
+                                                       explained[components[0]]))
+            ax.set_ylabel("{}PC {}: Explica {}".format(ylabel_prefix,
+                                                       components[1] + 1,
+                                                       explained[components[1]]))
 
         # Plot 3: 3D plot of PC 1 vs. PC 2 vs. PC 3
         #  ax_id = axes.pop()
