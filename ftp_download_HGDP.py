@@ -32,36 +32,37 @@ def ftp_walk_and_download(domain, remotedir, user, passwd, basedir, localdir=Non
     if os.path.isdir(localdir):
         os.rename(localdir, remotedir)  # I'll rename back after the process
 
-    log("Login to '{}' as: '{}', '{}'".format(domain, user, passwd))
-    with ftputil.FTPHost(domain, user, passwd) as host:
-        for root, dirs, files in host.walk(remotedir):
-            os.makedirs(root, exist_ok=True)
+    try:
+        log("Login to '{}' as: '{}', '{}'".format(domain, user, passwd))
+        with ftputil.FTPHost(domain, user, passwd) as host:
+            for root, dirs, files in host.walk(remotedir):
+                os.makedirs(root, exist_ok=True)
 
-            log("Walking down remote dir '{}'".format(root))
-            log("{} files found remotely.".format(len(files)))
-            for i, fpath in enumerate([os.path.join(root, fn) for fn in files]):
-                file_exists_locally = os.path.isfile(fpath)
+                log("Walking down remote dir '{}'".format(root))
+                log("{} files found remotely.".format(len(files)))
+                for i, fpath in enumerate([os.path.join(root, fn) for fn in files]):
+                    file_exists_locally = os.path.isfile(fpath)
 
-                filetag = "({}/{}) '{}'".format(i+1, len(files), fpath)
-                if file_exists_locally:
-                    if os.path.getsize(fpath) == host.path.getsize(fpath):
-                        log("{}: File exists, skip download.".format(filetag))
-                        continue
+                    filetag = "({}/{}) '{}'".format(i+1, len(files), fpath)
+                    if file_exists_locally:
+                        if os.path.getsize(fpath) == host.path.getsize(fpath):
+                            log("{}: File exists, skip download.".format(filetag))
+                            continue
 
-                remote_filesize = naturalsize(host.path.getsize(fpath))
-                log("{}: Downloading {}".format(filetag, remote_filesize))
-                host.download(fpath, fpath)
+                    remote_filesize = naturalsize(host.path.getsize(fpath))
+                    log("{}: Downloading {}".format(filetag, remote_filesize))
+                    host.download(fpath, fpath)
 
-            if len(dirs) > 0:
-                log("Continue with dirs: {}".format(str(dirs)))
-                for dirname in dirs:
-                    os.makedirs(dirname, exist_ok=True)
+                if len(dirs) > 0:
+                    log("Continue with dirs: {}".format(str(dirs)))
 
-            print()
+                print()
 
-    log("Done. Renaming '{}' to '{}'.".format(remotedir, localdir))
-    os.rename(remotedir, localdir)
-    os.chdir(original_dir)
+    finally:
+        log("Renaming '{}' to '{}'.".format(remotedir, localdir))
+        os.rename(remotedir, localdir)
+        os.chdir(original_dir)
+
     print()
 
 
@@ -71,8 +72,8 @@ if __name__ == "__main__":
         ("hgdp_supp1", "dataset_2_supp1_Stanford"),
         ("hgdp_supp2", "dataset_3_supp2_UMichigan"),
         ("hgdp_supp3", "dataset_4_supp3_MPlank"),
-        ("hgdp_supp15", "dataset_15_supp15_UCLA"),
         ("hgdp_supp10", "dataset_11_supp10_Harvard"),
+        ("hgdp_supp15", "dataset_15_supp15_UCLA"),
     ])
 
     BASEDIR = "/home/juan/tesina/HGDP_data"
