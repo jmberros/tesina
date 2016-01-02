@@ -76,11 +76,11 @@ def plot_PCAs(dataset_label, panels, genotypes_df, sample_populations_df,
             if ax_id % 2 != 0:
                 loc = "upper right"
                 dataset_tag = "".join([l[0] for l in dataset_label.split(", ")])
-                if dataset_tag in ["LE", "LEA"]:
+                if dataset_tag in ["LE"]:
                     loc="lower right"
-                elif dataset_tag in ["L"]:
+                elif dataset_tag in ["L", "LEA"]:
                     loc="upper left"
-                elif dataset_tag in ["LEAC"]:
+                elif dataset_tag in ["LEAC", "LEACI"]:
                     loc="lower left"
 
                 # len(dataset_tag) is a hacky way of telling how many
