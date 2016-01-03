@@ -27,7 +27,7 @@ def plot_PCAs(dataset_label, panels, genotypes_df, sample_populations_df,
     for panel_label, panel in panels.items():
         dataset = genotypes_df.loc[:, panel].dropna(axis=1)
         genotypes_matrix = dataset.as_matrix()
-        pop_labels = sample_populations_df.loc[dataset.index].population
+        pop_labels = sample_populations_df.loc[dataset.index]["population"]
 
         pca = PCA()
         pcas.append(pca)
@@ -45,7 +45,7 @@ def plot_PCAs(dataset_label, panels, genotypes_df, sample_populations_df,
                 # Convoluted way to filter the matrix rows
                 r = np.where(pop_labels == pop_label)[0]
                 marker = markers[pop_label]
-                lw = 0 if marker in ['o', '.', 'D', 's'] else 1
+                lw = 0 if marker in ['o', '.', 'D', 's', '^', '<', '>', '*'] else 1
                 z = 1 if marker == 'o' else 0
                 s = ax.scatter(X[r[0]:r[-1]+1, components[0]],
                                 X[r[0]:r[-1]+1, components[1]], lw=lw,
