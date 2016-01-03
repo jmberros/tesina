@@ -1,0 +1,41 @@
+# Africa
+Bantu: ^
+Mandenka: '>'
+LWK: .
+YRI: .
+
+# Middle East
+Adygei: x
+Balochi: +
+Brahui: +
+Bedouin: +
+
+# Europe
+Basque: x
+Bergamo: x
+BiakaPygmy: <
+IBS: .
+TSI: .
+
+# East Asia
+CHB: .
+CHS: .
+Mongola: +
+
+# Oceania
+Papuan: '*'
+
+# Latin America
+CLM: o
+Colombians: o
+French: x
+Karitiana: o
+Maya: o
+MXL: o
+PEL: o
+PUR: o
+Surui: o
+Pima: o
+
+# South Asia
+GIH: .
