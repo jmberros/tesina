@@ -40,17 +40,22 @@ def plot_PCAs(dataset_label, panels, genotypes_df, sample_populations_df,
             ax_id = axes.pop()
             ax = fig.add_subplot(n_rows, n_cols, ax_id)
             ax.set_title(panel_label)
+            legend_on = (ax_id - 1) % n_cols == 0
 
             for pop_label in pop_labels.unique():
                 # Convoluted way to filter the matrix rows
                 r = np.where(pop_labels == pop_label)[0]
+
                 marker = markers[pop_label]
                 lw = 0 if marker in ['o', '.', 'D', 's', '^', '<', '>', '*'] else 1
                 z = 1 if marker == 'o' else 0
-                s = ax.scatter(X[r[0]:r[-1]+1, components[0]],
-                                X[r[0]:r[-1]+1, components[1]], lw=lw,
-                                label=pop_label,
-                                marker=marker, c=colors[pop_label], zorder=z)
+
+                # Plot one component vs. other component for the selected rows
+                x = X[r[0]:r[-1]+1, components[0]]
+                y = X[r[0]:r[-1]+1, components[1]]
+
+                s = ax.scatter(x, y, lw=lw, label=pop_label, marker=marker,
+                               c=colors[pop_label], zorder=z, s=40)
                 ax.tick_params(axis="x", which="both", bottom="off", top="off",
                                labelbottom="off")
                 ax.tick_params(axis="y", which="both", left="off", right="off",
@@ -58,14 +63,25 @@ def plot_PCAs(dataset_label, panels, genotypes_df, sample_populations_df,
                 for spine in ax.spines.values():
                     spine.set_edgecolor("silver")
 
-            if panel_label == list(panels.keys())[-1]:
+                # Define legend location according to one key population mean
+                key_population_label = "PUR"
+                if legend_on and pop_label == key_population_label:
+                    xaxis_mean = np.mean(ax.get_xlim())
+                    yaxis_mean = np.mean(ax.get_ylim())
+                    legend_x = "right" if x.mean() < xaxis_mean else "left"
+                    legend_y = "upper" if y.mean() < yaxis_mean else "lower"
+
+            ylabel_prefix = ""
+            xlabel_prefix = ""
+
+            # Hardcoded: inversion applies only to the second panel
+            if panel_label == list(panels.keys())[1]:
                 if invert_y:
                     ax.invert_yaxis()
+                    ylabel_prefix = "–"
                 if invert_x:
                     ax.invert_xaxis()
-
-            ylabel_prefix = "–" if invert_y else ""
-            xlabel_prefix = "–" if invert_x else ""
+                    xlabel_prefix = "–"
 
             ax.set_xlabel("{}PC {}: Explica {}".format(xlabel_prefix,
                                                        components[0] + 1,
@@ -73,20 +89,13 @@ def plot_PCAs(dataset_label, panels, genotypes_df, sample_populations_df,
             ax.set_ylabel("{}PC {}: Explica {}".format(ylabel_prefix,
                                                        components[1] + 1,
                                                        explained[components[1]]))
-            if ax_id % 2 != 0:
-                loc = "upper right"
-                dataset_tag = "".join([l[0] for l in dataset_label.split(", ")])
-                if dataset_tag in ["LE"]:
-                    loc="lower right"
-                elif dataset_tag in ["L", "LEA"]:
-                    loc="upper left"
-                elif dataset_tag in ["LEAC", "LEACI"]:
-                    loc="lower left"
-
+            if legend_on:
+                loc = "{} {}".format(legend_y, legend_x)
                 # len(dataset_tag) is a hacky way of telling how many
                 # population groups there are in the dataset
+                dataset_tag = "".join([l[0] for l in dataset_label.split(", ")])
                 ncol = 2 if len(dataset_tag) > 3 else 1
-                legend = ax.legend(fontsize=11, loc=loc, scatterpoints=1,
+                legend = ax.legend(fontsize=12, loc=loc, scatterpoints=1,
                                    ncol=ncol)
                 legend.get_frame().set_edgecolor("silver")
 
@@ -126,4 +135,4 @@ def set_empty_figure(width, height):
     for loc in ['top', 'bottom', 'left', 'right']:
         ax.spines[loc].set_visible(False)
     return plt.gcf()
-    
+

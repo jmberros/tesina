@@ -1,17 +1,18 @@
 #!/bin/bash
 
 # Hardcoded stuff:
-BPSPACE=250000
 BASEDIR="/home/juan/tesina/1000Genomes_data"
 COUNTFILE="/home/juan/tesina/notebook/data/chr_SNP_count_in_galanter"
-OUTDIR="thinned-chromosomes"
+FACTOR=${1:-1}
+BPSPACE=${2:-250000}
+OUTDIR=${3:-"thinned-chromosomes"}
 
 mkdir -p "${BASEDIR}/${OUTDIR}"
 
 for CHR_COUNT in `cat "${COUNTFILE}"`; do
     CHR_COUNT=(${CHR_COUNT//,/ })
     CHR=${CHR_COUNT[0]}
-    COUNT=${CHR_COUNT[1]}
+    COUNT=$(( ${CHR_COUNT[1]} * $FACTOR ))
 
     OUTFILE="thinned.chr${CHR}.total${COUNT}snps.every${BPSPACE}"
 
