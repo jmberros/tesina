@@ -6,7 +6,10 @@ from sklearn.decomposition import PCA
 
 
 def plot_PCAs(dataset_label, panels, genotypes_df, sample_populations_df,
-              markers, colors, invert_y=False, invert_x=False):
+              markers, colors):
+
+    reference_populations = ["PUR", "Colombians"]  #### CHECK THIS
+    # ^ Used to orient the components in the same way across plots
 
     # Set figure and plots dimensions
     plot_width = 5
@@ -24,10 +27,11 @@ def plot_PCAs(dataset_label, panels, genotypes_df, sample_populations_df,
 
     pcas = []
 
-    for panel_label, panel in panels.items():
+    for ix, (panel_label, panel) in enumerate(panels.items()):
         dataset = genotypes_df.loc[:, panel].dropna(axis=1)
         genotypes_matrix = dataset.as_matrix()
         pop_labels = sample_populations_df.loc[dataset.index]["population"]
+        legend_on = ix == 0
 
         pca = PCA()
         pcas.append(pca)
@@ -40,14 +44,15 @@ def plot_PCAs(dataset_label, panels, genotypes_df, sample_populations_df,
             ax_id = axes.pop()
             ax = fig.add_subplot(n_rows, n_cols, ax_id)
             ax.set_title(panel_label)
-            legend_on = (ax_id - 1) % n_cols == 0
 
             for pop_label in pop_labels.unique():
                 # Convoluted way to filter the matrix rows
                 r = np.where(pop_labels == pop_label)[0]
 
                 marker = markers[pop_label]
-                lw = 0 if marker in ['o', '.', 'D', 's', '^', '<', '>', '*'] else 1
+                filled_markers = ['o', '.', 'D', 's', '^', '<', '>', '*']
+
+                lw = 0 if marker in filled_markers else 1
                 z = 1 if marker == 'o' else 0
 
                 # Plot one component vs. other component for the selected rows
@@ -63,25 +68,24 @@ def plot_PCAs(dataset_label, panels, genotypes_df, sample_populations_df,
                 for spine in ax.spines.values():
                     spine.set_edgecolor("silver")
 
-                # Define legend location according to one key population mean
-                key_population_label = "PUR"
-                if legend_on and pop_label == key_population_label:
+                # Define inversion of axis to align components across plots
+                # Keep the reference population in the upper left
+                if pop_label in reference_populations:
                     xaxis_mean = np.mean(ax.get_xlim())
                     yaxis_mean = np.mean(ax.get_ylim())
-                    legend_x = "right" if x.mean() < xaxis_mean else "left"
-                    legend_y = "upper" if y.mean() < yaxis_mean else "lower"
+
+                    # Use the median to define where the scatter cloud is,
+                    # since the mean is distorted by the outliers.
+                    reference_in_the_left = np.median(x) < xaxis_mean
+                    reference_in_the_top = np.median(y) > yaxis_mean
+
+                    if not reference_in_the_left:
+                        ax.invert_xaxis()
+                    if not reference_in_the_top:
+                        ax.invert_yaxis()
 
             ylabel_prefix = ""
             xlabel_prefix = ""
-
-            # Hardcoded: inversion applies only to the second panel
-            if panel_label == list(panels.keys())[1]:
-                if invert_y:
-                    ax.invert_yaxis()
-                    ylabel_prefix = "–"
-                if invert_x:
-                    ax.invert_xaxis()
-                    xlabel_prefix = "–"
 
             ax.set_xlabel("{}PC {}: Explica {}".format(xlabel_prefix,
                                                        components[0] + 1,
@@ -90,31 +94,13 @@ def plot_PCAs(dataset_label, panels, genotypes_df, sample_populations_df,
                                                        components[1] + 1,
                                                        explained[components[1]]))
             if legend_on:
-                loc = "{} {}".format(legend_y, legend_x)
                 # len(dataset_tag) is a hacky way of telling how many
                 # population groups there are in the dataset
                 dataset_tag = "".join([l[0] for l in dataset_label.split(", ")])
                 ncol = 2 if len(dataset_tag) > 3 else 1
-                legend = ax.legend(fontsize=12, loc=loc, scatterpoints=1,
-                                   ncol=ncol)
+                legend = ax.legend(fontsize=12, loc="lower right",
+                                   scatterpoints=1, ncol=ncol)
                 legend.get_frame().set_edgecolor("silver")
-
-        # Plot 3: 3D plot of PC 1 vs. PC 2 vs. PC 3
-        #  ax_id = axes.pop()
-        #  ax = fig.add_subplot(n_rows, n_cols, ax_id, projection='3d')
-        #  ax.view_init(elev=25, azim=45)
-
-        #  for pop_label in pop_labels.unique():
-            #  # Convoluted way to filter the matrix rows
-            #  r = np.where(pop_labels == pop_label)[0]
-            #  s = ax.scatter(X[r[0]:r[-1]+1, 0],
-                            #  X[r[0]:r[-1]+1, 1],
-                            #  X[r[0]:r[-1]+1, 2],
-                            #  marker=markers[pop_label], c=colors[pop_label])
-
-        #  ax.set_xlabel("\nPC 1", linespacing=1)
-        #  ax.set_ylabel("\nPC 2", linespacing=1)
-        #  ax.set_zlabel("\nPC 3", linespacing=1)
 
     plt.tight_layout()
     fig.suptitle("Dataset: " + dataset_label, fontsize=19, fontweight="bold",
