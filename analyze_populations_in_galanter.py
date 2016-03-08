@@ -30,6 +30,7 @@ def boxplot_freqs_by_populations(df, populations_to_plot, title=""):
     ax.spines["right"].set_visible(False)
     ax.spines["left"].set_visible(False)
 
-    ax.xaxis.grid()
+    # ax.xaxis.grid()
+    ax.grid(False)
 
     return ax
