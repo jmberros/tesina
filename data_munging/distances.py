@@ -7,13 +7,13 @@ def _distances_between_positions(positions, chromosome, genome):
     """Returns a list of the distances between the SNPs in a chromosome,
     and between the chromosome ends and their closest SNPs."""
     positions = np.array(sorted(positions))
-    chr_end = genome.loc[chromosome].length
+    chr_end = genome.loc[chromosome]["chr_length"]
 
-    if any(positions > chr_end):
-        illegal_positions = [n for n in positions if n > chr_end]
-        error_msg = "SNP positions {} greater than chromosome {} " + \
-                    "length".format(illegal_positions, chromosome)
-        raise Exception(error_msg)
+    #  if any(positions > chr_end):
+        #  illegal_positions = [n for n in positions if n > chr_end]
+        #  error_msg = "SNP positions {} greater than chromosome {} " + \
+                    #  "length".format(illegal_positions, chromosome)
+        #  raise Exception(error_msg)
 
     # To compute the distances, we substract each SNP position to the next SNP
     # position. For the first SNP, we subsctract the position 0; for the last,
