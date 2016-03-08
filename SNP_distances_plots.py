@@ -90,4 +90,13 @@ def distances_boxplot(present, genome, title="", ax=None, **kwargs):
     ax.set_xlabel("Cromosoma")
     ax.set_axis_bgcolor('white')
 
+    ax.yaxis.set_ticks_position("none")
+    ax.xaxis.set_ticks_position("none")
+
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+    ax.spines["left"].set_visible(False)
+
+    ax.yaxis.grid()
+
     return ax
