@@ -78,14 +78,13 @@ def distances_boxplot(present, genome, title="", ax=None, **kwargs):
         ax = plt.subplot(111)
 
     ax.boxplot(list(df.values()), positions=list(df.keys()),
-               flierprops={'markersize': 8, 'marker': 'x'},
-               **kwargs)
+               showfliers=False, patch_artist=True, **kwargs)
 
     # Display 10 (Mbp) instead of 10.000.000
     y_range = np.array(ax.get_yticks())
     ax.set_yticklabels([int(y) for y in y_range // 10**6])
 
-    ax.set_title(title, y=1.04)
+    ax.set_title(title, y=1.08)
 
     ax.set_ylabel("Distancia (Mpb)")
     ax.set_xlabel("Cromosoma")

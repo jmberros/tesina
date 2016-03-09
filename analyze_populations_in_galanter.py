@@ -6,7 +6,8 @@ def boxplot_freqs_by_populations(df, populations_to_plot, title=""):
     [df.drop(field, axis=1, inplace=True)
      for field in df if field not in populations_to_plot]
 
-    df.boxplot(rot=90, showmeans=True, figsize=(16, 9))
+    df.boxplot(rot=90, showmeans=True, figsize=(16, 9), patch_artist=True,
+               return_type="dict")
 
     ax = plt.subplot(111)
 
