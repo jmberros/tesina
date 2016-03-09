@@ -6,13 +6,13 @@ def boxplot_freqs_by_populations(df, populations_to_plot, title=""):
     [df.drop(field, axis=1, inplace=True)
      for field in df if field not in populations_to_plot]
 
-    df.boxplot(rot=90, showmeans=True, figsize=(16, 9), patch_artist=True,
-               return_type="dict")
+    box = df.boxplot(rot=90, patch_artist=True, return_type="dict")
+
+    for patch in box["boxes"]:
+        patch.set_facecolor("skyblue")
+        patch.set_edgecolor("white")
 
     ax = plt.subplot(111)
-
-    #  ax.figure.set_figheight=10
-    #  ax.figure.set_figwidth=15
 
     # ax.set_ylim([0, 1])
     # ax.axhline(0.5, color='k', linestyle='--')

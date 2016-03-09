@@ -78,7 +78,7 @@ def distances_boxplot(present, genome, title="", ax=None, **kwargs):
         ax = plt.subplot(111)
 
     ax.boxplot(list(df.values()), positions=list(df.keys()),
-               showfliers=False, patch_artist=True, **kwargs)
+               showfliers=False, patch_artist=True)# , **kwargs)
 
     # Display 10 (Mbp) instead of 10.000.000
     y_range = np.array(ax.get_yticks())
