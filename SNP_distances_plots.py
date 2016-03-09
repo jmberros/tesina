@@ -85,17 +85,10 @@ def distances_boxplot(present, genome, title="", ax=None, **kwargs):
     y_range = np.array(ax.get_yticks())
     ax.set_yticklabels([int(y) for y in y_range // 10**6])
 
-    ax.set_title(title)
+    ax.set_title(title, y=1.04)
+
     ax.set_ylabel("Distancia (Mpb)")
     ax.set_xlabel("Cromosoma")
-    ax.set_axis_bgcolor('white')
-
-    ax.yaxis.set_ticks_position("none")
-    ax.xaxis.set_ticks_position("none")
-
-    ax.spines["top"].set_visible(False)
-    ax.spines["right"].set_visible(False)
-    ax.spines["left"].set_visible(False)
 
     ax.yaxis.grid()
 
