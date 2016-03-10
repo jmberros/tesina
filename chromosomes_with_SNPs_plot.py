@@ -8,7 +8,7 @@ def chromosomes_with_SNPs_plot(genome, snp_groups_dict):
     where the dataframe has fields named chr and position"""
 
     fig, ax = plt.subplots()
-    fig.set_size_inches(16, 9)
+    # fig.set_size_inches(16, 9)
 
     # The chromosomes with their centromeres are kind of a hacky drawing.
     # It's just three overlapping bars, and the middle one gets to be the
