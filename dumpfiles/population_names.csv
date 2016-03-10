@@ -1,27 +1,28 @@
-Population Code,Population Description,Super Population Code
-CHB,"Han Chinese in Bejing, China",EAS
-JPT,"Japanese in Tokyo, Japan",EAS
-CHS,Southern Han Chinese,EAS
-CDX,"Chinese Dai in Xishuangbanna, China",EAS
-KHV,"Kinh in Ho Chi Minh City, Vietnam",EAS
-CEU,Utah Residents (CEPH) with Northern and  Western European Ancestry,EUR
-TSI,Toscani in Italia,EUR
-FIN,Finnish in Finland,EUR
-GBR,British in England and Scotland,EUR
-IBS,Iberian Population in Spain,EUR
-YRI,"Yoruba in Ibadan, Nigeria",AFR
-LWK,"Luhya in Webuye, Kenya",AFR
-GWD,Gambian in Western Divisions in the Gambia,AFR
-MSL,Mende in Sierra Leone,AFR
-ESN,Esan in Nigeria,AFR
-ASW,Americans of African Ancestry in SW USA,AFR
-ACB,African Caribbeans in Barbados,AFR
-MXL,Mexican Ancestry from Los Angeles USA,AMR
-PUR,Puerto Ricans from Puerto Rico,AMR
-CLM,"Colombians from Medellin, Colombia",AMR
-PEL,"Peruvians from Lima, Peru",AMR
-GIH,"Gujarati Indian from Houston, Texas",SAS
-PJL,"Punjabi from Lahore, Pakistan",SAS
-BEB,Bengali from Bangladesh,SAS
-STU,Sri Lankan Tamil from the UK,SAS
-ITU,Indian Telugu from the UK,SAS
+,Population Code,Population Description,Super Population Code,Sequence Data Available,Alignment Data Available,Variant Data Available
+0,CHB,"Han Chinese in Bejing, China",EAS,1.0,1.0,1.0
+1,JPT,"Japanese in Tokyo, Japan",EAS,1.0,1.0,1.0
+2,CHS,Southern Han Chinese,EAS,1.0,1.0,1.0
+3,CDX,"Chinese Dai in Xishuangbanna, China",EAS,1.0,1.0,1.0
+4,KHV,"Kinh in Ho Chi Minh City, Vietnam",EAS,1.0,1.0,1.0
+5,CEU,Utah Residents (CEPH) with Northern and Western Ancestry,EUR,1.0,1.0,1.0
+6,TSI,Toscani in Italia,EUR,1.0,1.0,1.0
+7,FIN,Finnish in Finland,EUR,1.0,1.0,1.0
+8,GBR,British in England and Scotland,EUR,1.0,1.0,1.0
+9,IBS,Iberian Population in Spain,EUR,1.0,1.0,1.0
+10,YRI,"Yoruba in Ibadan, Nigeria",AFR,1.0,1.0,1.0
+11,LWK,"Luhya in Webuye, Kenya",AFR,1.0,1.0,1.0
+12,GWD,Gambian in Western Divisions in the Gambia,AFR,1.0,1.0,1.0
+13,MSL,Mende in Sierra Leone,AFR,1.0,1.0,1.0
+14,ESN,Esan in Nigeria,AFR,1.0,1.0,1.0
+15,ASW,Americans of African Ancestry in SW USA,AFR,1.0,1.0,1.0
+16,ACB,African Caribbeans in Barbados,AFR,1.0,1.0,1.0
+17,MXL,Mexican Ancestry from Los Angeles USA,AMR,1.0,1.0,1.0
+18,PUR,Puerto Ricans from Puerto Rico,AMR,1.0,1.0,1.0
+19,CLM,"Colombians from Medellin, Colombia",AMR,1.0,1.0,1.0
+20,PEL,"Peruvians from Lima, Peru",AMR,1.0,1.0,1.0
+21,GIH,"Gujarati Indian from Houston, Texas",SAS,1.0,1.0,1.0
+22,PJL,"Punjabi from Lahore, Pakistan",SAS,1.0,1.0,1.0
+23,BEB,Bengali from Bangladesh,SAS,1.0,1.0,1.0
+24,STU,Sri Lankan Tamil from the UK,SAS,1.0,1.0,1.0
+25,ITU,Indian Telugu from the UK,SAS,1.0,1.0,1.0
+CEU,,Utah Residents (CEPH) with Northern and Western European Ancestry,,,,
