@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 def chromosomes_with_SNPs_plot(genome, snp_groups_dict):
     """snps_grups_dict is expected to be a dict with entries like
-    {'label': {'df': snp_dataframe, 'color': 'k', marker: 'x'}},
+    {"label": {"df": snp_dataframe, "color": "k", marker: "x"}},
     where the dataframe has fields named chr and position"""
 
     fig, ax = plt.subplots()
@@ -27,10 +27,10 @@ def chromosomes_with_SNPs_plot(genome, snp_groups_dict):
 
     # SNPs
     for label, data in snp_groups_dict.items():
-        ax.scatter(x=data['df'].chr.values - 1, y=data['df'].position.values,
-                   zorder=1, marker=data.get('marker'), linewidth=2,
-                   s=data.get('s'), label=label,
-                   color=data.get('color'))
+        ax.scatter(x=data["df"]["chr"].values - 1, y=data["df"]["position"].values,
+                   zorder=1, marker=data.get("marker"), linewidth=2,
+                   s=data.get("s"), label=label,
+                   color=data.get("color"))
 
     max_len = genome["chr_length"].max()
     ax.set_ylim([0, max_len * 1.05])
@@ -51,7 +51,7 @@ def chromosomes_with_SNPs_plot(genome, snp_groups_dict):
     ax.set_yticklabels([l for l in yticklabels if l % 50 == 0])
     ax.set_xticklabels(genome.index, rotation=0, fontsize=14)
 
-    legend = ax.legend(loc='best', scatterpoints=1)
+    legend = ax.legend(loc="best", scatterpoints=1)
     legend.get_frame().set_facecolor("steelblue")
     legend.get_frame().set_edgecolor("steelblue")
     for text in legend.get_texts():
