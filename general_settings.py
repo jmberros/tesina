@@ -63,8 +63,8 @@ for factor in cp_factors:
 debug("'control_names' dict")
 
 kG_creator = ThousandGenomes()
-df_1000G_sample_populations = kG_creator.read_samples_data()
-debug("'df_1000G_sample_populations'")
+df_1000G_samples = kG_creator.read_samples_data()
+debug("'df_1000G_samples'")
 
 df_1000G_SNPs = kG_creator.read_1000G_snps()
 debug("'df_1000G_SNPs'")
@@ -72,8 +72,8 @@ debug("'df_1000G_SNPs'")
 df_1000G_genotypes = kG_creator.read_1000G_genotypes()
 debug("'df_1000G_genotypes'")
 
-df_1000G_population_names = kG_creator.read_1000G_population_names()
-debug("'df_1000G_population_names'")
+df_1000G_populations = kG_creator.read_1000G_population_names()
+debug("'df_1000G_populations'")
 
 df_1000G_genotypes_alleles = kG_creator.create_1000G_alleles_df(df_1000G_genotypes)
 debug("'df_1000G_genotypes_alleles'")
