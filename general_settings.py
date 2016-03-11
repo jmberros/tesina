@@ -17,6 +17,7 @@ from settings.genome import create_genome_df
 from helpers.plot_helpers import hide_spines_and_ticks
 from helpers.debug import debug
 
+
 pd.options.display.max_columns = 40  # Affy csv has 30 fields
 mpl.rc_file_defaults()  # see .config/matplotlib/matplotlibrc
 
@@ -59,6 +60,8 @@ debug("'control_rsIDs' dict to filter it ^")
 
 cp_factors = panel_creator.cp_factors
 debug("'cp_factors' list")
+
+control_labels = cp_factors
 
 control_names = OrderedDict()
 for factor, rsIDs in control_rsIDs.items():

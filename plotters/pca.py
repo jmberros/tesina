@@ -4,14 +4,14 @@ import numpy as np
 from os.path import join, expanduser
 from mpl_toolkits.mplot3d import Axes3D
 from sklearn.decomposition import PCA
-from helpers.plot_helpers import hide_spines_and_ticks
+from helpers import plot_helpers
 
 
 FIGS_DIR = expanduser("~/tesina/charts/PCAs")
 
 class PCAPlotter:
     def plot(self, figtitle, rsIDs_per_panel, dataset_genotypes, samples,
-             components_to_compare, panel_names, dataset_label, markers, colors):
+             components_to_compare, panel_names, filename):
 
         reference_populations = ["PUR", "Colombians"]  #### CHECK THIS
         # ^ Used to orient the components in the same way across plots
@@ -20,8 +20,18 @@ class PCAPlotter:
         plot_width = 5
         plot_height = 5
 
-        n_cols = len(rsIDs_per_panel) + 4  # The extra column is for the legend
-                                           # And more for extra components
+        if components_to_compare == [(0, 1)]:
+            n_cols = len(rsIDs_per_panel)
+        else:
+            # I only plot extra components for one panel in a different figure,
+            # so I only need the extra columns in that case, where the amount
+            # of panels is not equal to the number of columns.
+            n_cols = len(components_to_compare)
+            # The first two components are ploted elsewhere
+            # So in this figure, we're plotting from PC2 + 1, two per col:
+            figtitle += "\nComponentes Principales 3 a {}".format(2 + 2*n_cols)
+
+        n_cols += 1  # Extra column for the legend in an empty axes
         n_rows = 1
         fig_width = plot_width * n_cols
         fig_height = plot_height * n_rows
@@ -36,8 +46,6 @@ class PCAPlotter:
             dataset = dataset_genotypes.loc[:, panel].dropna(axis=1)
             genotypes_matrix = dataset.values
             pop_labels = samples.loc[dataset.index]["population"]
-            #  legend_on = ix == (n_cols - 1)  # Old code, see below [1]
-
             pca = PCA()
             pcas.append(pca)
 
@@ -51,10 +59,8 @@ class PCAPlotter:
                             for ratio in pca.explained_variance_ratio_]
 
             for components in components_to_compare:
-                if components != (0, 1) and panel_label != "100":
-                    continue
-
                 ax_id = axes.pop()
+
                 ax = fig.add_subplot(n_rows, n_cols, ax_id)
                 ax.set_title(panel_names[panel_label], y=1.1)
 
@@ -62,22 +68,23 @@ class PCAPlotter:
                     # Convoluted way to filter the matrix rows
                     r = np.where(pop_labels == pop_label)[0]
 
-                    marker = markers[pop_label]
-                    filled_markers = ['o', '.', 'D', 's', '^', '<', '>', '*']
+                    marker = plot_helpers.population_markers(pop_label)
+                    color = plot_helpers.population_colors(pop_label)
 
-                    lw = 0 if marker in filled_markers else 1
-                    z = 1 if marker == 'o' else 0
+                    filled_markers = ['o', '.', 'D', 's', '^', '<', '>', '*']
+                    lw = 0 if marker in filled_markers else 1  # linewidth
+                    z = 1 if marker == 'o' else 0  # americans appear on top
 
                     # Plot one component vs. other component for the selected rows
                     x = X[r[0]:r[-1]+1, components[0]]
                     y = X[r[0]:r[-1]+1, components[1]]
 
                     s = ax.scatter(x, y, lw=lw, label=pop_label, marker=marker,
-                                c=colors[pop_label], zorder=z, s=40)
-                    ax.tick_params(axis="x", which="both", bottom="off", top="off",
-                                labelbottom="off")
-                    ax.tick_params(axis="y", which="both", left="off", right="off",
-                                labelleft="off")
+                                   c=color, zorder=z, s=40)
+                    ax.tick_params(axis="x", which="both", bottom="off",
+                                   top="off", labelbottom="off")
+                    ax.tick_params(axis="y", which="both", left="off",
+                                   right="off", labelleft="off")
                     for spine in ax.spines.values():
                         spine.set_edgecolor("silver")
 
@@ -109,19 +116,9 @@ class PCAPlotter:
                                                            components[1] + 1,
                                                            explained[components[1]]))
 
-                ## [1] Old code: Used when I put the legend on the first axes
-                ## Now I'm putting it on a phantom extra axes
-                #  if legend_on:
-                    #  # len(dataset_tag) is a hacky way of telling how many
-                    #  # population groups there are in the dataset
-                    #  ncol = 2 if len(dataset_label) > 3 else 1
-                    #  legend = ax.legend(fontsize=12, loc="lower right",
-                                       #  scatterpoints=1, ncol=ncol)
-                    #  legend.get_frame().set_edgecolor("silver")
-
-                #  #  ax.axvline(0, linestyle="dotted", color="grey")
-                #  #  ax.axhline(0, linestyle="dotted", color="grey")
-                hide_spines_and_ticks(ax, ["top", "bottom", "right", "left"])
+                #  ax.axvline(0, linestyle="dotted", color="grey")
+                #  ax.axhline(0, linestyle="dotted", color="grey")
+                plot_helpers.hide_spines_and_ticks(ax, spines="all")
 
         # Legend axes
         ax = fig.add_subplot(n_rows, n_cols, axes.pop())
@@ -138,8 +135,7 @@ class PCAPlotter:
                      position=(0, 1.2), ha="left")
         plt.subplots_adjust(top=0.85)
 
-        filename = "{}_{}".format(dataset_label, panel_label)
-        plt.savefig(join(FIGS_DIR, filename))
+        plt.savefig(join(FIGS_DIR, filename), facecolor="w")
         plt.show()
 
         return pcas
