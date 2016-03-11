@@ -1,14 +1,17 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
+from os.path import join, expanduser
 from mpl_toolkits.mplot3d import Axes3D
 from sklearn.decomposition import PCA
 from helpers.plot_helpers import hide_spines_and_ticks
 
 
+FIGS_DIR = expanduser("~/tesina/charts/PCAs")
+
 class PCAPlotter:
     def plot(self, figtitle, rsIDs_per_panel, dataset_genotypes, samples,
-             markers, colors):
+             panel_names, dataset_label, markers, colors):
 
         reference_populations = ["PUR", "Colombians"]  #### CHECK THIS
         # ^ Used to orient the components in the same way across plots
@@ -31,12 +34,15 @@ class PCAPlotter:
 
         for ix, (panel_label, panel) in enumerate(rsIDs_per_panel.items()):
             dataset = dataset_genotypes.loc[:, panel].dropna(axis=1)
-            genotypes_matrix = dataset.as_matrix()
+            genotypes_matrix = dataset.values
             pop_labels = samples.loc[dataset.index]["population"]
             #  legend_on = ix == (n_cols - 1)  # Old code, see below [1]
 
             pca = PCA()
             pcas.append(pca)
+
+            # This step creates a new matrix, which will take RAM as the df
+            # of genotypes that it uses as input.
             X = pca.fit_transform(genotypes_matrix)
 
             explained = [str(round(ratio * 100, 1)) + "%"
@@ -45,7 +51,7 @@ class PCAPlotter:
             for components in component_pairs_to_plot:
                 ax_id = axes.pop()
                 ax = fig.add_subplot(n_rows, n_cols, ax_id)
-                ax.set_title(panel_label, y=1.1)
+                ax.set_title(panel_names[panel_label], y=1.1)
 
                 for pop_label in pop_labels.unique():
                     # Convoluted way to filter the matrix rows
@@ -112,6 +118,8 @@ class PCAPlotter:
                 #  #  ax.axhline(0, linestyle="dotted", color="grey")
                 hide_spines_and_ticks(ax, ["top", "bottom", "right", "left"])
 
+            del(X)  # Try and see if this frees some RAM
+
         # Legend axes
         ax = fig.add_subplot(n_rows, n_cols, axes.pop())
         ax.set_xticklabels([])
@@ -126,6 +134,9 @@ class PCAPlotter:
         fig.suptitle(figtitle, fontsize=19, fontweight="bold",
                      position=(0, 1.2), ha="left")
         plt.subplots_adjust(top=0.85)
+
+        filename = "{}_{}".format(dataset_label, panel_label)
+        plt.savefig(join(FIGS_DIR, filename))
         plt.show()
 
         return pcas

@@ -10,9 +10,9 @@ from pandas import DataFrame as DF
 from pandas import Series as S
 from collections import OrderedDict
 
-from settings.panel_creator import PanelCreator
+from panels.panel_creator import PanelCreator
+from panels.thousand_genomes import ThousandGenomes
 from settings.genome import create_genome_df
-from settings.thousand_genomes import ThousandGenomes
 
 from helpers.plot_helpers import hide_spines_and_ticks
 from helpers.debug import debug
@@ -41,6 +41,11 @@ for panel_label, panel in panels.items():
     name = "{0} · {1:,} SNPs".format(panel_label, snp_count)
     panel_names[panel_label] = name.replace(",", ".")
 debug("'panel_names' dict")
+
+panel_rsIDs = OrderedDict()
+for panel_label, panel in panels.items():
+    panel_rsIDs[panel_label] = panel.index
+debug("'panel_rsIDs' dict")
 
 genome = create_genome_df()
 debug("'genome' dataframe")
