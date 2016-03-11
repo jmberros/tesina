@@ -10,7 +10,12 @@ KG_SNPS_DUMPFILE = "./dumpfiles/1000G_SNPinfo_dataframe.csv"
 KG_GENOTYPES_DUMPFILE = "./dumpfiles/1000G_genotypes_dataframe.csv"
 POP_NAMES_DUMFILE = "./dumpfiles/population_names.csv"
 KG_ALLELES_DUMPFILE = "./dumpfiles/1000G_genotypes_alleles_dataframe"
-
+POP_FREQS_TEMPLATES = {
+    "population": "~/tesina/1000Genomes_data/galanter-extracted-SNPs-" + \
+                  "from-1000Genomes/{}.populations.frq.strat",
+    "superpopulation": "~/tesina/1000Genomes_data/galanter-extracted-" + \
+                       "SNPs-from-1000Genomes/{}.superpopulations.frq.strat"
+}
 
 class ThousandGenomes:
     def read_samples_data(self):
@@ -71,6 +76,21 @@ class ThousandGenomes:
             df.to_csv(KG_ALLELES_DUMPFILE)
 
         return pd.read_csv(KG_ALLELES_DUMPFILE, index_col=0)
+
+
+    def read_frequency_files(self):
+        mafs = {"population": {}, "superpopulation": {}}
+        panel_labels = ["GAL_Completo", "GAL_Affy"]  # Remove this
+
+        for panel_label in panel_labels:
+            for level in mafs:
+                fn = POP_FREQS_TEMPLATES[level].format(panel_label.lower())
+                df = pd.read_csv(fn, engine="python", sep="\s*")
+                df = df.pivot_table(values="MAF", index="SNP", columns="CLST")
+                df = df.applymap(lambda freq: 1 - freq if freq > 0.5 else freq)
+                mafs[level][panel_label] = df
+
+        return mafs
 
 
     def _parse_and_dump_1000G_data(self):

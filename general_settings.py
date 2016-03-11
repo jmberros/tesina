@@ -82,5 +82,7 @@ debug("'df_1000G_genotypes_alleles'")
 def whois(pop_code):
     return df_1000G_population_names.loc[pop_code]['Population Description']
 
+mafs = kG_creator.read_frequency_files()
+debug("'mafs' dataframe")
 
 print("=> You should check your RAM! <=")
