@@ -9,17 +9,13 @@ from matplotlib import cm
 from pandas import DataFrame as DF
 from pandas import Series as S
 from collections import OrderedDict
-from datetime import datetime
 
-from settings.creator import PanelCreator
+from settings.panels import PanelCreator
 from settings.genome import create_genome_df
+from settings.thousand_genomes import ThousandGenomes
 
 from data_munging.plot_helpers import hide_spines_and_ticks
-
-
-def debug(msg):
-    timestamp = "{:[%H:%M:%S]} ".format(datetime.now())
-    print(timestamp + msg)
+from helpers.debug import debug
 
 pd.options.display.max_columns = 40  # Affy csv has 30 fields
 mpl.rc_file_defaults()  # see .config/matplotlib/matplotlibrc
@@ -66,4 +62,25 @@ for factor in cp_factors:
     control_names[factor] = name.replace(",", ".")
 debug("'control_names' dict")
 
-debug("=> You should check your RAM! <=")
+kG_creator = ThousandGenomes()
+df_1000G_sample_populations = kG_creator.read_samples_data()
+debug("'df_1000G_sample_populations'")
+
+df_1000G_SNPs = kG_creator.read_1000G_snps()
+debug("'df_1000G_SNPs'")
+
+df_1000G_genotypes = kG_creator.read_1000G_genotypes()
+debug("'df_1000G_genotypes'")
+
+df_1000G_population_names = kG_creator.read_1000G_population_names()
+debug("'df_1000G_population_names'")
+
+df_1000G_genotypes_alleles = kG_creator.create_1000G_alleles_df(df_1000G_genotypes)
+debug("'df_1000G_genotypes_alleles'")
+
+# FIXME: put this elsewhere
+def whois(pop_code):
+    return df_1000G_population_names.loc[pop_code]['Population Description']
+
+
+print("=> You should check your RAM! <=")
