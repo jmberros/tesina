@@ -3,6 +3,7 @@ import numpy as np
 
 from mpl_toolkits.mplot3d import Axes3D
 from sklearn.decomposition import PCA
+from helpers.plot_helpers import hide_spines_and_ticks
 
 
 class PCAPlotter:
@@ -14,10 +15,10 @@ class PCAPlotter:
 
         # Set figure and plots dimensions
         plot_width = 5
-        plot_height = 6
+        plot_height = 5
         component_pairs_to_plot = [(0, 1)]
 
-        n_cols = len(panels) + 1 # plots per dataset/panel
+        n_cols = len(panels) + 1  # The extra column is for the legend
         n_rows = 1
         fig_width = plot_width * n_cols
         fig_height = plot_height * n_rows
@@ -32,7 +33,8 @@ class PCAPlotter:
             dataset = genotypes_df.loc[:, panel].dropna(axis=1)
             genotypes_matrix = dataset.as_matrix()
             pop_labels = samples.loc[dataset.index]["population"]
-            legend_on = ix == 0
+            print(ix)
+            #  legend_on = ix == (n_cols - 1)  # Old code, see below [1]
 
             pca = PCA()
             pcas.append(pca)
@@ -85,22 +87,41 @@ class PCAPlotter:
                         if not reference_in_the_top:
                             ax.invert_yaxis()
 
+                    handles, labels = ax.get_legend_handles_labels()
+
                 ylabel_prefix = ""
                 xlabel_prefix = ""
 
                 ax.set_xlabel("{}PC {}: Explica {}".format(xlabel_prefix,
-                                                        components[0] + 1,
-                                                        explained[components[0]]))
+                                                           components[0] + 1,
+                                                           explained[components[0]]))
                 ax.set_ylabel("{}PC {}: Explica {}".format(ylabel_prefix,
-                                                        components[1] + 1,
-                                                        explained[components[1]]))
-                if legend_on:
-                    # len(dataset_tag) is a hacky way of telling how many
-                    # population groups there are in the dataset
-                    ncol = 2 if len(dataset_label) > 3 else 1
-                    legend = ax.legend(fontsize=12, loc="lower right",
-                                    scatterpoints=1, ncol=ncol)
-                    legend.get_frame().set_edgecolor("silver")
+                                                           components[1] + 1,
+                                                           explained[components[1]]))
+
+                ## [1] Old code: Used when I put the legend on the first axes
+                ## Now I'm putting it on a phantom extra axes
+                #  if legend_on:
+                    #  # len(dataset_tag) is a hacky way of telling how many
+                    #  # population groups there are in the dataset
+                    #  ncol = 2 if len(dataset_label) > 3 else 1
+                    #  legend = ax.legend(fontsize=12, loc="lower right",
+                                       #  scatterpoints=1, ncol=ncol)
+                    #  legend.get_frame().set_edgecolor("silver")
+
+                #  #  ax.axvline(0, linestyle="dotted", color="grey")
+                #  #  ax.axhline(0, linestyle="dotted", color="grey")
+                hide_spines_and_ticks(ax, ["top", "bottom", "right", "left"])
+
+        # Legend axes
+        ax = fig.add_subplot(n_rows, n_cols, axes.pop())
+        ax.set_xticklabels([])
+        ax.set_yticklabels([])
+        ax.set_xticks([])
+        ax.set_yticks([])
+        for loc in ['top', 'bottom', 'left', 'right']:
+            ax.spines[loc].set_visible(False)
+        ax.legend(handles, labels, loc="center left", ncol=1)
 
         plt.tight_layout()
         fig.suptitle("Dataset: " + dataset_name, fontsize=19, fontweight="bold",
@@ -109,16 +130,4 @@ class PCAPlotter:
         plt.show()
 
         return pcas
-
-    #  def set_empty_figure(self, width, height):
-        #  plt.figure(figsize=(width, height))
-        #  ax = plt.subplot(111)
-        #  ax.set_xticklabels([])
-        #  ax.set_yticklabels([])
-        #  ax.set_xticks([])
-        #  ax.set_yticks([])
-        #  for loc in ['top', 'bottom', 'left', 'right']:
-            #  ax.spines[loc].set_visible(False)
-        #  return plt.gcf()
-
 
