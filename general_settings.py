@@ -10,7 +10,7 @@ from pandas import DataFrame as DF
 from pandas import Series as S
 from collections import OrderedDict
 
-from settings.panels import PanelCreator
+from settings.panel_creator import PanelCreator
 from settings.genome import create_genome_df
 from settings.thousand_genomes import ThousandGenomes
 
@@ -48,18 +48,18 @@ debug("'genome' dataframe")
 lat = panel_creator.read_Affy_panel()
 debug("'lat' dataframe")
 
-# control
-control_genotypes = panel_creator.read_control_panels()
-debug("'control_genotypes' dict of dataframes")
+control_rsIDs, control_genotypes = panel_creator.read_control_panels()
+debug("'control_genotypes' huge datagrame")
+debug("'control_rsIDs' dict to filter it ^")
 
 cp_factors = panel_creator.cp_factors
 debug("'cp_factors' list")
 
 control_names = OrderedDict()
-for factor in cp_factors:
-    snp_count = len(control_genotypes[factor].columns)
-    name = "Panel de {0:,} SNPs".format(snp_count)
-    control_names[factor] = name.replace(",", ".")
+for factor, rsIDs in control_rsIDs.items():
+    snp_count = len(rsIDs)
+    control_panel_name = "Panel de {0:,} SNPs".format(snp_count)
+    control_names[factor] = control_panel_name.replace(",", ".")
 debug("'control_names' dict")
 
 kG_creator = ThousandGenomes()
@@ -85,4 +85,3 @@ def whois(pop_code):
 mafs = kG_creator.read_frequency_files()
 debug("'mafs' dataframe")
 
-print("=> You should check your RAM! <=")

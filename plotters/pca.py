@@ -7,8 +7,8 @@ from helpers.plot_helpers import hide_spines_and_ticks
 
 
 class PCAPlotter:
-    def plot(self, dataset_label, dataset_name,
-             panels, genotypes_df, samples, markers, colors):
+    def plot(self, figtitle, rsIDs_per_panel, dataset_genotypes, samples,
+             markers, colors):
 
         reference_populations = ["PUR", "Colombians"]  #### CHECK THIS
         # ^ Used to orient the components in the same way across plots
@@ -18,7 +18,7 @@ class PCAPlotter:
         plot_height = 5
         component_pairs_to_plot = [(0, 1)]
 
-        n_cols = len(panels) + 1  # The extra column is for the legend
+        n_cols = len(rsIDs_per_panel) + 1  # The extra column is for the legend
         n_rows = 1
         fig_width = plot_width * n_cols
         fig_height = plot_height * n_rows
@@ -29,8 +29,8 @@ class PCAPlotter:
 
         pcas = []
 
-        for ix, (panel_label, panel) in enumerate(panels.items()):
-            dataset = genotypes_df.loc[:, panel].dropna(axis=1)
+        for ix, (panel_label, panel) in enumerate(rsIDs_per_panel.items()):
+            dataset = dataset_genotypes.loc[:, panel].dropna(axis=1)
             genotypes_matrix = dataset.as_matrix()
             pop_labels = samples.loc[dataset.index]["population"]
             #  legend_on = ix == (n_cols - 1)  # Old code, see below [1]
@@ -45,7 +45,7 @@ class PCAPlotter:
             for components in component_pairs_to_plot:
                 ax_id = axes.pop()
                 ax = fig.add_subplot(n_rows, n_cols, ax_id)
-                ax.set_title(panel_label)
+                ax.set_title(panel_label, y=1.1)
 
                 for pop_label in pop_labels.unique():
                     # Convoluted way to filter the matrix rows
@@ -123,8 +123,8 @@ class PCAPlotter:
         ax.legend(handles, labels, loc="center left", ncol=1)
 
         plt.tight_layout()
-        fig.suptitle("Dataset: " + dataset_name, fontsize=19, fontweight="bold",
-                    position=(0, 1), ha="left")
+        fig.suptitle(figtitle, fontsize=19, fontweight="bold",
+                     position=(0, 1.2), ha="left")
         plt.subplots_adjust(top=0.85)
         plt.show()
 
