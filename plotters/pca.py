@@ -33,7 +33,6 @@ class PCAPlotter:
             dataset = genotypes_df.loc[:, panel].dropna(axis=1)
             genotypes_matrix = dataset.as_matrix()
             pop_labels = samples.loc[dataset.index]["population"]
-            print(ix)
             #  legend_on = ix == (n_cols - 1)  # Old code, see below [1]
 
             pca = PCA()
