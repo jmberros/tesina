@@ -11,7 +11,7 @@ FIGS_DIR = expanduser("~/tesina/charts/PCAs")
 
 class PCAPlotter:
     def plot(self, figtitle, rsIDs_per_panel, dataset_genotypes, samples,
-             panel_names, dataset_label, markers, colors):
+             components_to_compare, panel_names, dataset_label, markers, colors):
 
         reference_populations = ["PUR", "Colombians"]  #### CHECK THIS
         # ^ Used to orient the components in the same way across plots
@@ -19,9 +19,9 @@ class PCAPlotter:
         # Set figure and plots dimensions
         plot_width = 5
         plot_height = 5
-        component_pairs_to_plot = [(0, 1)]
 
-        n_cols = len(rsIDs_per_panel) + 1  # The extra column is for the legend
+        n_cols = len(rsIDs_per_panel) + 4  # The extra column is for the legend
+                                           # And more for extra components
         n_rows = 1
         fig_width = plot_width * n_cols
         fig_height = plot_height * n_rows
@@ -45,10 +45,15 @@ class PCAPlotter:
             # of genotypes that it uses as input.
             X = pca.fit_transform(genotypes_matrix)
 
+            del(dataset)  # Maybe this will help the RAM use?
+
             explained = [str(round(ratio * 100, 1)) + "%"
                             for ratio in pca.explained_variance_ratio_]
 
-            for components in component_pairs_to_plot:
+            for components in components_to_compare:
+                if components != (0, 1) and panel_label != "100":
+                    continue
+
                 ax_id = axes.pop()
                 ax = fig.add_subplot(n_rows, n_cols, ax_id)
                 ax.set_title(panel_names[panel_label], y=1.1)
@@ -117,8 +122,6 @@ class PCAPlotter:
                 #  #  ax.axvline(0, linestyle="dotted", color="grey")
                 #  #  ax.axhline(0, linestyle="dotted", color="grey")
                 hide_spines_and_ticks(ax, ["top", "bottom", "right", "left"])
-
-            del(X)  # Try and see if this frees some RAM
 
         # Legend axes
         ax = fig.add_subplot(n_rows, n_cols, axes.pop())

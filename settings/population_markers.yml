@@ -1,7 +1,7 @@
 # Africa
 Bantu: ^
 Mandenka: '>'
-LWK: .
+LWK: x
 YRI: .
 
 # Middle East
@@ -15,11 +15,11 @@ Basque: x
 Bergamo: x
 BiakaPygmy: <
 IBS: .
-GBR: .
+GBR: x
 
 # East Asia
 CHB: .
-CHS: .
+CHS: x
 Mongola: +
 
 # Oceania
