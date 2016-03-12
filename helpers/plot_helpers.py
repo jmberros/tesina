@@ -26,3 +26,7 @@ def population_markers(population_code):
 def population_colors(population_code):
     return load_yaml("./settings/population_colors.yml")[population_code]
 
+
+def panel_colors(panel_label):
+    return load_yaml("./settings/panel_colors.yml")[panel_label]
+
