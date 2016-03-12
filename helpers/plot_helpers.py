@@ -1,4 +1,4 @@
-import yaml
+from .general_helpers import load_yaml
 
 
 def hide_spines_and_ticks(ax, spines=["top", "right", "left"]):
@@ -10,13 +10,6 @@ def hide_spines_and_ticks(ax, spines=["top", "right", "left"]):
 
     ax.xaxis.set_ticks_position("none")
     ax.yaxis.set_ticks_position("none")
-
-
-# This should go in a general purpose helpers file?
-def load_yaml(fn):
-    with open(fn, "r") as f:
-        dic = yaml.load(f)
-    return dic
 
 
 def population_markers(population_code):

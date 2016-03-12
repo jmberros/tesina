@@ -1,0 +1,38 @@
+labels:
+    - L
+    - LE
+    - LEA
+    - LEAC
+    - LEACI
+
+names:
+    L: Latinos
+    LE: Latinos, Europeos
+    LEA: Latinos, Europeos, Africanos
+    LEAC: Latinos, Europeos, Africanos, Chinos
+    LEACI: Latinos, Europeos, Africanos, Chinos, Indios
+
+# This should be a sequence, but I couldn't reuse previous sequences in the
+# next ones, which I can with mappings.
+populations:
+    L: &L
+        ? PEL
+        ? MXL
+        ? CLM
+        ? PUR
+    LE: &LE
+        << : *L
+        ? ISB
+        ? GBR
+    LEA: &LEA
+        << : *LE
+        ? YRI
+        ? LWK
+    LEAC: &LEAC
+        << : *LEA
+        ? CHB
+        ? CHS
+    LEACI: &LEACI
+        << : *LEAC
+        ? GIH
+

@@ -15,7 +15,7 @@ from panels.thousand_genomes import ThousandGenomes
 from settings.genome import create_genome_df
 
 from helpers.plot_helpers import hide_spines_and_ticks
-from helpers.debug import debug
+from helpers.general_helpers import debug
 
 
 pd.options.display.max_columns = 40  # Affy csv has 30 fields

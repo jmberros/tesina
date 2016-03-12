@@ -11,10 +11,8 @@ KG_GENOTYPES_DUMPFILE = "./dumpfiles/1000G_genotypes_dataframe.csv"
 POP_NAMES_DUMFILE = "./dumpfiles/population_names.csv"
 KG_ALLELES_DUMPFILE = "./dumpfiles/1000G_genotypes_alleles_dataframe"
 POP_FREQS_TEMPLATES = {
-    "population": "~/tesina/1000Genomes_data/galanter-extracted-SNPs-" + \
-                  "from-1000Genomes/{}.populations.frq.strat",
-    "superpopulation": "~/tesina/1000Genomes_data/galanter-extracted-" + \
-                       "SNPs-from-1000Genomes/{}.superpopulations.frq.strat"
+    "population": "~/tesina/1000Genomes_data/galanter_beds/{}.populations.frq.strat",
+    "superpopulation": "~/tesina/1000Genomes_data/galanter_beds/{}.superpopulations.frq.strat"
 }
 
 class ThousandGenomes:
