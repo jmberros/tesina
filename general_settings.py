@@ -61,7 +61,7 @@ debug("'control_rsIDs' dict to filter it ^")
 cp_factors = panel_creator.cp_factors
 debug("'cp_factors' list")
 
-control_labels = cp_factors
+control_labels = ["random_x{}".format(factor) for factor in cp_factors]
 
 control_names = OrderedDict()
 for factor, rsIDs in control_rsIDs.items():

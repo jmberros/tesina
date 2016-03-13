@@ -25,9 +25,37 @@ class DatasetCreator():
         else:
             return d
 
+    def datasets():
+        return dataset_definitions("datasets")
 
     def populations_per_dataset(self):
-        return self.dataset_definitions("populations")
+        datasets = self.dataset_definitions("datasets")
+        # [ L, LE, LEA ... ]
+        populations_per_group = self.dataset_definitions("populations")
+        # { L: [ PEL, MXL ... ], E: [ GBR .. ] }
+
+        od = OrderedDict()
+        for dataset_label in datasets:  # L, LE, LEA ...
+            populations = []
+            for pop_group in dataset_label.split(): # L, E, A ...
+                populations.append(populations_per_group[pop_group])
+            od[label] = populations
+
+        return od
+
+
+    def dataset_names():
+        datasets = self.dataset_definitions("datasets")
+        names_per_group = self.dataset_definitions("names")
+
+        d = {}
+        for dataset_label in datasets:  # L, LE, LEA ...
+            name = ", ".join([names[group] for group in dataset_label.split()])
+            d[dataset_label] = names[dataset_label]
+
+        # VER SI ESTO FUNCA
+
+        return d
 
 
     def sample_IDs_per_dataset(self):
