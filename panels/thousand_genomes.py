@@ -3,6 +3,7 @@ import pandas as pd
 
 from os.path import isfile
 
+
 SAMPLES_FILENAME = "~/tesina/1000Genomes_data/original-1000Genomes-files/" + \
                    "integrated_call_samples_v3.20130502.ALL.panel"
 VCF_GALANTER = "~/tesina/1000G_analysis/galanter_1000Genomes.vcf"
@@ -14,6 +15,7 @@ POP_FREQS_TEMPLATES = {
     "population": "~/tesina/1000Genomes_data/galanter_beds/{}.populations.frq.strat",
     "superpopulation": "~/tesina/1000Genomes_data/galanter_beds/{}.superpopulations.frq.strat"
 }
+
 
 class ThousandGenomes:
     def read_samples_data(self):
