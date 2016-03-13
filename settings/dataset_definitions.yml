@@ -22,7 +22,7 @@ populations:
         ? PUR
     LE: &LE
         << : *L
-        ? ISB
+        ? IBS
         ? GBR
     LEA: &LEA
         << : *LE

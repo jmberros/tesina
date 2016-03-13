@@ -18,6 +18,7 @@ df_1000G_samples = kG_creator.read_samples_data()
 
 dataset_samples = OrderedDict()
 for label, population_codes in dataset_populations.items():
+    # I should check the population_codes exist in the df
     mask = df_1000G_samples["population"].isin(population_codes)
     dataset_samples[label] = df_1000G_samples[mask].index.values
 
