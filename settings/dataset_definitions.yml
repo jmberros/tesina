@@ -1,4 +1,4 @@
-labels:
+datasets:
     - L
     - LE
     - LEA
@@ -7,32 +7,26 @@ labels:
 
 names:
     L: Latinos
-    LE: Latinos, Europeos
-    LEA: Latinos, Europeos, Africanos
-    LEAC: Latinos, Europeos, Africanos, Chinos
-    LEACI: Latinos, Europeos, Africanos, Chinos, Indios
+    E: Europeos
+    A: Africanos
+    C: Chinos
+    I: Indios
 
-# This should be a sequence, but I couldn't reuse previous sequences in the
-# next ones, which I can with mappings.
 populations:
-    L: &L
-        ? PEL
-        ? MXL
-        ? CLM
-        ? PUR
-    LE: &LE
-        << : *L
-        ? IBS
-        ? GBR
-    LEA: &LEA
-        << : *LE
-        ? YRI
-        ? LWK
-    LEAC: &LEAC
-        << : *LEA
-        ? CHB
-        ? CHS
-    LEACI: &LEACI
-        << : *LEAC
-        ? GIH
+    L:
+    - PEL
+    - MXL
+    - CLM
+    - PUR
+    E:
+    - IBS
+    - GBR
+    A:
+    - YRI
+    - LWK
+    C:
+    - CHB
+    - CHS
+    I:
+    - GIH
 
