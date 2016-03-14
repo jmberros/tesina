@@ -53,10 +53,11 @@ class PCAPlotter:
             # of genotypes that it uses as input.
             X = pca.fit_transform(genotypes_matrix)
 
-            del(dataset)  # Maybe this will help the RAM use?
+            # Maybe this will help the RAM use:
+            del(dataset, genotypes_matrix)
 
             explained = [str(round(ratio * 100, 1)) + "%"
-                            for ratio in pca.explained_variance_ratio_]
+                         for ratio in pca.explained_variance_ratio_]
 
             for components in components_to_compare:
                 ax_id = axes.pop()
