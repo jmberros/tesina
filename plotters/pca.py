@@ -6,6 +6,7 @@ from pandas import DataFrame
 from sklearn.decomposition import PCA
 from helpers import plot_helpers
 from panels.thousand_genomes import ThousandGenomes
+from helpers.plot_helpers import legend_subplot
 
 FIGS_DIR = expanduser("~/tesina/charts/PCAs")
 
@@ -132,25 +133,14 @@ class PCAPlotter:
 
                 plot_helpers.hide_spines_and_ticks(ax, spines="all")
 
-        # Legend axes
-        ax = fig.add_subplot(n_rows, n_cols, axes.pop())
-        ax.set_axis_bgcolor("white")
-        ax.set_xticklabels([])
-        ax.set_yticklabels([])
-        ax.set_xticks([])
-        ax.set_yticks([])
-        for loc in ['top', 'bottom', 'left', 'right']:
-            ax.spines[loc].set_visible(False)
-
         populations_df = ThousandGenomes().read_population_names()
         pop_descriptions = [populations_df.loc[label]["Population Description"]
                             for label in labels]
-
         legend_labels = ["  -  ".join(pair) for pair
                          in zip(labels, pop_descriptions)]
-        ax.legend(handles, legend_labels,
-                  loc="center left", ncol=1, scatterpoints=1)
-        ax.legend_.get_frame().set_facecolor("white")
+
+        ax = fig.add_subplot(n_rows, n_cols, axes.pop())
+        ax = legend_subplot(ax, handles, legend_labels)
 
         plt.tight_layout()
         fig.suptitle(figtitle, fontsize=19, fontweight="bold",

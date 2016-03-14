@@ -1,6 +1,6 @@
-GAL_Completo: Tomato
-GAL_Affy: CornflowerBlue
+GAL_Completo: CornflowerBlue
+GAL_Affy: Crimson
 
-1: "#555555"
-10: "#666666"
-100: "#777777"
+CPx1: MediumAquaMarine
+CPx10: LimeGreen
+CPx100: DarkGreen
