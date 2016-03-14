@@ -13,12 +13,12 @@ DATASETS_DIR = "/home/juan/tesina/dataset_dumps/"
 
 
 class DatasetCreator():
-    def dataset_definitions(self, key=None):
+    def definitions(self, key=None):
         d = load_yaml("./settings/dataset_definitions.yml")
 
         # Hack to get list from the keys of a YAML mapping
-        for k, val in d["populations"].items():
-            d["populations"][k] = list(d["populations"][k])
+        for k, val in d["populations_per_group"].items():
+            d["populations_per_group"][k] = list(d["populations_per_group"][k])
 
         if key:
             return d[key]
@@ -26,34 +26,34 @@ class DatasetCreator():
             return d
 
     def datasets():
-        return dataset_definitions("datasets")
+        return definitions("datasets")
 
     def populations_per_dataset(self):
-        datasets = self.dataset_definitions("datasets")
+        datasets = self.definitions("datasets")
         # [ L, LE, LEA ... ]
-        populations_per_group = self.dataset_definitions("populations")
-        # { L: [ PEL, MXL ... ], E: [ GBR .. ] }
 
         od = OrderedDict()
         for dataset_label in datasets:  # L, LE, LEA ...
             populations = []
-            for pop_group in dataset_label.split(): # L, E, A ...
-                populations.append(populations_per_group[pop_group])
-            od[label] = populations
+            for pop_group in list(dataset_label):  # L, E, A ...
+                pop_list = self.definitions("populations_per_group")[pop_group]
+                populations.extend(pop_list)
+            od[dataset_label] = populations
 
         return od
 
 
-    def dataset_names():
-        datasets = self.dataset_definitions("datasets")
-        names_per_group = self.dataset_definitions("names")
+    def dataset_names(self):
+        datasets = self.definitions("datasets")
+        names_per_group = self.definitions("names")
 
-        d = {}
+        d = {}  # {"LEA": "Latinos, Europeos ...", ...}
         for dataset_label in datasets:  # L, LE, LEA ...
-            name = ", ".join([names[group] for group in dataset_label.split()])
-            d[dataset_label] = names[dataset_label]
+            group_names = []  # [Latinos, Europeos ...]
+            for group in list(dataset_label):  # L, E, A ...
+                group_names.append(names_per_group[group])
 
-        # VER SI ESTO FUNCA
+            d[dataset_label] = ", ".join(group_names)
 
         return d
 

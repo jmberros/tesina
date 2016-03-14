@@ -10,7 +10,7 @@ kG_creator = ThousandGenomes()
 df_1000G_samples = kG_creator.read_samples_data()
 dataset_creator = DatasetCreator()
 
-dataset_names = dataset_creator.dataset_definitions("names")
+dataset_names = dataset_creator.dataset_names()
 debug("'dataset_names'")
 
 dataset_populations = dataset_creator.populations_per_dataset()

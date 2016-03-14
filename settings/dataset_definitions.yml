@@ -5,6 +5,8 @@ datasets:
     - LEAC
     - LEACI
 
+plot_order: [L, E, A, C, I]
+
 names:
     L: Latinos
     E: Europeos
@@ -12,7 +14,7 @@ names:
     C: Chinos
     I: Indios
 
-populations:
+populations_per_group:
     L:
     - PEL
     - MXL

@@ -1,41 +1,41 @@
 # Africa
 LWK: Red
-YRI: Tomato
-BiakaPygmy: IndianRed
-Bantu: DarkRed
-Mandenka: DarkOrange
+YRI: Orange
+# BiakaPygmy: IndianRed
+# Bantu: DarkRed
+# Mandenka: DarkOrange
 
 # Middle East
-Adygei: RoyalBlue
-Balochi: DarkViolet
-Bedouin: DarkOrchid
-Brahui: Fuchsia
+# Adygei: RoyalBlue
+# Balochi: DarkViolet
+# Bedouin: DarkOrchid
+# Brahui: Fuchsia
 
 # Europe
-Bergamo: Navy
-Basque: DeepSkyBlue
-French: MidnightBlue
+# Bergamo: Navy
+# Basque: DeepSkyBlue
+# French: MidnightBlue
 IBS: Blue
 GBR: RoyalBlue
 
 # East Asia
 CHB: DarkTurquoise
 CHS: DeepSkyBlue
-Mongola: DarkMagenta
+# Mongola: DarkMagenta
 
 # Oceania
-Papuan: DarkOliveGreen
+# Papuan: DarkOliveGreen
 
 # Latin America
 CLM: DarkGreen
-Colombians: DarkGreen
-Karitiana: Indigo
 MXL: Indigo
-Maya: DeepPink
 PEL: PaleVioletRed
 PUR: Peru
-Pima: DodgerBlue
-Surui: GoldenRod
+# Colombians: DarkGreen
+# Karitiana: Indigo
+# Maya: DeepPink
+# Pima: DodgerBlue
+# Surui: GoldenRod
 
 # South Asia
 GIH: Fuchsia

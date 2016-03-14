@@ -6,8 +6,7 @@ import scipy as sp
 
 from IPython.display import display, Math, Latex
 from matplotlib import cm
-from pandas import DataFrame as DF
-from pandas import Series as S
+from pandas import DataFrame, Series
 from collections import OrderedDict
 
 from panels.panel_creator import PanelCreator
@@ -86,7 +85,7 @@ debug("'df_1000G_populations'")
 df_1000G_genotypes_alleles = kG_creator.create_1000G_alleles_df(df_1000G_genotypes)
 debug("'df_1000G_genotypes_alleles'")
 
-# FIXME: put this elsewhere
+# TODO: put this elsewhere
 def whois(pop_code):
     return df_1000G_population_names.loc[pop_code]['Population Description']
 
