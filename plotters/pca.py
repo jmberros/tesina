@@ -148,7 +148,8 @@ class PCAPlotter:
 
         legend_labels = ["  -  ".join(pair) for pair
                          in zip(labels, pop_descriptions)]
-        ax.legend(handles, legend_labels, loc="center left", ncol=1)
+        ax.legend(handles, legend_labels,
+                  loc="center left", ncol=1, scatterpoints=1)
         ax.legend_.get_frame().set_facecolor("white")
 
         plt.tight_layout()
