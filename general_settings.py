@@ -19,6 +19,7 @@ from helpers.general_helpers import debug
 
 pd.options.display.max_columns = 40  # Affy csv has 30 fields
 mpl.rc_file_defaults()  # see .config/matplotlib/matplotlibrc
+plt.style.use("ggplot")
 
 panel_creator = PanelCreator()
 
@@ -69,26 +70,26 @@ for factor, rsIDs in control_rsIDs.items():
     control_names[factor] = control_panel_name.replace(",", ".")
 debug("'control_names' dict")
 
-kG_creator = ThousandGenomes()
-df_1000G_samples = kG_creator.read_samples_data()
+thousand_genomes = ThousandGenomes()
+df_1000G_samples = thousand_genomes.read_samples_data()
 debug("'df_1000G_samples'")
 
-df_1000G_SNPs = kG_creator.read_1000G_snps()
+df_1000G_SNPs = thousand_genomes.read_snps()
 debug("'df_1000G_SNPs'")
 
-df_1000G_genotypes = kG_creator.read_1000G_genotypes()
+df_1000G_genotypes = thousand_genomes.read_genotypes()
 debug("'df_1000G_genotypes'")
 
-df_1000G_populations = kG_creator.read_1000G_population_names()
+df_1000G_populations = thousand_genomes.read_population_names()
 debug("'df_1000G_populations'")
 
-df_1000G_genotypes_alleles = kG_creator.create_1000G_alleles_df(df_1000G_genotypes)
+df_1000G_genotypes_alleles = thousand_genomes.create_alleles_df(df_1000G_genotypes)
 debug("'df_1000G_genotypes_alleles'")
 
 # TODO: put this elsewhere
 def whois(pop_code):
     return df_1000G_population_names.loc[pop_code]['Population Description']
 
-mafs = kG_creator.read_frequency_files()
+mafs = thousand_genomes.read_frequency_files()
 debug("'mafs' dataframe")
 

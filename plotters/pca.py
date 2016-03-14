@@ -5,7 +5,7 @@ from os.path import join, expanduser
 from pandas import DataFrame
 from sklearn.decomposition import PCA
 from helpers import plot_helpers
-
+from panels.thousand_genomes import ThousandGenomes
 
 FIGS_DIR = expanduser("~/tesina/charts/PCAs")
 
@@ -76,7 +76,8 @@ class PCAPlotter:
             for components in components_to_compare:
                 ax_id = axes.pop()
                 ax = fig.add_subplot(n_rows, n_cols, ax_id)
-                ax.set_title(panel_names[panel_label], y=1.1)
+                ax.set_title(panel_names[panel_label], y=1.1,
+                             fontsize=17, fontweight="bold")
 
                 for pop_label in populations_to_plot:
 
@@ -93,10 +94,12 @@ class PCAPlotter:
                     y = pca_df[population_mask][components[1]]
                     s = ax.scatter(x, y, lw=lw, label=pop_label, marker=marker,
                                    c=color, zorder=z, s=40)
-                    ax.tick_params(axis="x", which="both", bottom="off",
+                    ax.set_axis_bgcolor("white")
+                    ax.tick_params(axis="x", bottom="off",
                                    top="off", labelbottom="off")
-                    ax.tick_params(axis="y", which="both", left="off",
+                    ax.tick_params(axis="y", left="off",
                                    right="off", labelleft="off")
+                    ax.grid(False)
                     for spine in ax.spines.values():
                         spine.set_edgecolor("silver")
 
@@ -131,17 +134,26 @@ class PCAPlotter:
 
         # Legend axes
         ax = fig.add_subplot(n_rows, n_cols, axes.pop())
+        ax.set_axis_bgcolor("white")
         ax.set_xticklabels([])
         ax.set_yticklabels([])
         ax.set_xticks([])
         ax.set_yticks([])
         for loc in ['top', 'bottom', 'left', 'right']:
             ax.spines[loc].set_visible(False)
-        ax.legend(handles, labels, loc="center left", ncol=1)
+
+        populations_df = ThousandGenomes().read_population_names()
+        pop_descriptions = [populations_df.loc[label]["Population Description"]
+                            for label in labels]
+
+        legend_labels = ["  -  ".join(pair) for pair
+                         in zip(labels, pop_descriptions)]
+        ax.legend(handles, legend_labels, loc="center left", ncol=1)
+        ax.legend_.get_frame().set_facecolor("white")
 
         plt.tight_layout()
         fig.suptitle(figtitle, fontsize=19, fontweight="bold",
-                    position=(0, 1.2), ha="left")
+                     position=(0, 1.2), ha="left")
         plt.subplots_adjust(top=0.85)
 
         plt.savefig(join(FIGS_DIR, filename), facecolor="w")

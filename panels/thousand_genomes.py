@@ -29,32 +29,32 @@ class ThousandGenomes:
         return samples
 
 
-    def read_1000G_snps(self):
+    def read_snps(self):
         if not isfile(KG_SNPS_DUMPFILE):
-            self._parse_and_dump_1000G_data()
+            self._parse_and_dump_data()
 
         return pd.read_csv(KG_SNPS_DUMPFILE, index_col='ID')
 
 
-    def read_1000G_genotypes(self):
+    def read_genotypes(self):
         if not isfile(KG_GENOTYPES_DUMPFILE):
-            self._parse_and_dump_1000G_data()
+            self._parse_and_dump_data()
 
         return pd.read_csv(KG_GENOTYPES_DUMPFILE, index_col=0)
 
 
-    def read_1000G_population_names(self):
+    def read_population_names(self):
         if isfile(POP_NAMES_DUMFILE):
             return pd.read_csv(POP_NAMES_DUMFILE, index_col='Population Code')
 
-        df = _get_1000g_pop_names_from_url().set_index("Population Code")
+        df = _get_pop_names_from_url().set_index("Population Code")
         df.to_csv(POP_NAMES_DUMFILE)
 
         return df[["Population Description", "Super Population Code"]]
 
 
-    def create_1000G_alleles_df(self, df_1000G_genotypes):
-        df = pd.DataFrame(index=df_1000G_genotypes.index)
+    def create_alleles_df(self, df_genotypes):
+        df = pd.DataFrame(index=df_genotypes.index)
 
         if not isfile(KG_ALLELES_DUMPFILE):
             def genotype_code_to_alleles(code, ref, alt):
@@ -70,7 +70,7 @@ class ThousandGenomes:
                 return ''.join(alleles)
 
             for i, (rs, genotypes) in enumerate(df.iteritems()):
-                ref, alt = df_1000G_SNPs.loc[rs][['REF', 'ALT']]
+                ref, alt = df_SNPs.loc[rs][['REF', 'ALT']]
                 df[rs] = genotypes.apply(genotype_code_to_alleles, args=(ref, alt))
 
             df.to_csv(KG_ALLELES_DUMPFILE)
@@ -93,29 +93,29 @@ class ThousandGenomes:
         return mafs
 
 
-    def _parse_and_dump_1000G_data(self):
+    def _parse_and_dump_data(self):
         records = self._vcf_records(VCF_GALANTER)
         records_as_dictionaries = [_vcf_record_to_dict(r) for r in records]
 
         # Clean up 1000genomes data
-        df_1000G_SNPs = pd.DataFrame(records_as_dictionaries).set_index('ID')
-        df_1000G_SNPs = df_1000G_SNPs.dropna(axis=1)
-        df_1000G_SNPs = df_1000G_SNPs.drop(['FILTER', 'alleles'], axis=1)
-        df_1000G_SNPs = self._remove_unkown_snp_subtypes(df_1000G_SNPs)
-        df_1000G_SNPs = self._remove_unnecessary_lists_from_df(df_1000G_SNPs)
+        df_SNPs = pd.DataFrame(records_as_dictionaries).set_index('ID')
+        df_SNPs = df_SNPs.dropna(axis=1)
+        df_SNPs = df_SNPs.drop(['FILTER', 'alleles'], axis=1)
+        df_SNPs = self._remove_unkown_snp_subtypes(df_SNPs)
+        df_SNPs = self._remove_unnecessary_lists_from_df(df_SNPs)
 
         # Get sample genotypes
         frames = [pd.DataFrame(dict(genotypes), index=[rs])
-                  for rs, genotypes in df_1000G_SNPs['sample_genotypes'].iteritems()]
-        df_1000G_genotypes = pd.concat(frames).transpose()
-        df_1000G_genotypes.to_csv(KG_GENOTYPES_DUMPFILE)
+                  for rs, genotypes in df_SNPs['sample_genotypes'].iteritems()]
+        df_genotypes = pd.concat(frames).transpose()
+        df_genotypes.to_csv(KG_GENOTYPES_DUMPFILE)
 
         # Remove big unnecessary field after exporting its data to 'samples_genotypes'
-        df_1000G_SNPs = df_1000G_SNPs.drop('sample_genotypes', axis=1)
-        df_1000G_SNPs.to_csv(KG_SNPS_DUMPFILE)
+        df_SNPs = df_SNPs.drop('sample_genotypes', axis=1)
+        df_SNPs.to_csv(KG_SNPS_DUMPFILE)
 
 
-    def _get_1000g_pop_names_from_url():
+    def _get_pop_names_from_url():
         url = "http://www.1000genomes.org/category/" + \
               "frequently-asked-questions/population"
 
