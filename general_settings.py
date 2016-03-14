@@ -33,7 +33,7 @@ debug("'galanter', 'present', 'missing' dataframes")
 
 del(panels["GAL_Faltantes"])  # I never use this one
 
-panel_labels = list(panels.keys())
+panel_labels = panel_creator.panel_labels()
 debug("'panel_labels'")
 
 panel_names = generate_panel_names(panels)
@@ -57,7 +57,9 @@ debug("'control_rsIDs' dict to filter it ^")
 cp_factors = panel_creator.cp_factors
 debug("'cp_factors' list")
 
-control_labels = ["CPx{}".format(factor) for factor in cp_factors]
+#  control_labels = ["CPx{}".format(factor) for factor in cp_factors]
+control_labels = panel_creator.control_labels()
+debug("'control_labels'")
 
 control_names = OrderedDict()
 for factor, rsIDs in control_rsIDs.items():

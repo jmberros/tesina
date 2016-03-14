@@ -77,13 +77,10 @@ class PanelCreator:
         return lat
 
     def read_control_panels(self):
-        # Hardcoded for three panels
-        self.cp_factors = ["1", "10", "100"]
-
         control_rsIDs = OrderedDict()
         df_list = {}
 
-        for factor in self.cp_factors:
+        for factor in self.cp_factors():
             fn = CONTROL_PANEL_FILENAME_TEMPLATE.format(factor)
             df = pd.read_csv(fn, sep="\t", index_col="SNP").transpose()
             df.index = [sample.split("_")[0] for sample in df.index]
@@ -98,6 +95,16 @@ class PanelCreator:
 
         return control_rsIDs, control_genotypes
 
+
+    def panel_labels(self):
+        # Hardcoded, keeping the first two labels
+        return list(self.read_AIMs_panels().keys())[0:2]
+
+
+    def control_labels(self):
+        return ["CPx{}".format(f) for f in self.cp_factors()]
+
+
     def _merge_genotype_dataframes(self, df1, df2):
         merged_df = pd.merge(df1, df2, suffixes=("", "_duplicated"),
                              left_index=True, right_index=True)
@@ -105,4 +112,10 @@ class PanelCreator:
         merged_df.drop(duplicated_entries.columns, axis=1, inplace=True)
 
         return merged_df
+
+
+    def cp_factors(self):
+        # Hardcoded for three panels
+        return ["1", "10", "100"]
+
 

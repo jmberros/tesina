@@ -9,7 +9,7 @@ SAMPLES_FILENAME = "~/tesina/1000Genomes_data/original-1000Genomes-files/" + \
 VCF_GALANTER = "~/tesina/1000G_analysis/galanter_1000Genomes.vcf"
 KG_SNPS_DUMPFILE = "./dumpfiles/1000G_SNPinfo_dataframe.csv"
 KG_GENOTYPES_DUMPFILE = "./dumpfiles/1000G_genotypes_dataframe.csv"
-POP_NAMES_DUMFILE = "./dumpfiles/population_names.csv"
+POP_NAMES_DUMFILE = "/home/juan/tesina/1000Genomes_data/population_names.csv"
 KG_ALLELES_DUMPFILE = "./dumpfiles/1000G_genotypes_alleles_dataframe"
 POP_FREQS_TEMPLATES = {
     "population": "~/tesina/1000Genomes_data/galanter_beds/{}.populations.frq.strat",
@@ -48,9 +48,10 @@ class ThousandGenomes:
             return pd.read_csv(POP_NAMES_DUMFILE, index_col='Population Code')
 
         df = _get_pop_names_from_url().set_index("Population Code")
+        df = df[["Population Description", "Super Population Code"]]
         df.to_csv(POP_NAMES_DUMFILE)
 
-        return df[["Population Description", "Super Population Code"]]
+        return df
 
 
     def create_alleles_df(self, df_genotypes):

@@ -30,7 +30,7 @@ class AdmixtureCVErrors:
         return "_".join(txt.split("_")[1:]).replace("cpx", "")
 
 
-    def plot_cv_errors(self):
+    def plot(self):
         cols, rows = (2, 3)
         plot_width, plot_height = (5, 3)
 
