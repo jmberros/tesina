@@ -19,17 +19,20 @@ class AdmixtureResults:
         dataframes = []
 
         datasets = DatasetCreator().definitions("datasets")
-        #  datasets = ["LEACI"]
         Ks = self.available_Ks()
-        #  Ks = [2]
         panels = self._all_panels_labels()
 
         for dataset_label, K, panel_label in product(datasets, Ks, panels):
+
+            # Comment this if you wanna get every result
+            #  if self.optimal_Ks()[dataset_label] != K:
+                #  continue
+
             fdir = "~/tesina/admixture/{}_{}/".format(dataset_label,
                                                         panel_label)
             fname = "{}_{}.{}.Q".format(dataset_label, panel_label, K)
 
-            ancestry_values = pd.read_csv(join(fdir, fname), sep="\s+",
+            ancestries_df = pd.read_csv(join(fdir, fname), sep="\s+",
                                             names=list(range(K)))
 
             # Assign sample IDs
@@ -40,40 +43,33 @@ class AdmixtureResults:
             samples = pd.read_csv(join(fdir, fname), sep="\s+",
                                     index_col=0, usecols=[0],
                                     names=["sample"])
-            ancestry_values.index = samples.index
+            ancestries_df.index = samples.index
 
             # Add population data to the sample IDs
             samples_df = ThousandGenomes().read_samples_data()
-            ancestry_values = samples_df.join(ancestry_values).dropna()
+            ancestries_df = samples_df.join(ancestries_df).dropna()
 
-            continents_present = len(ancestry_values["super_population"].unique())
-            if continents_present > 3:
-                self.infer_ancestral_components_from_samples_origin(ancestry_values)
+            continents_present = len(ancestries_df["super_population"].unique())
+            if continents_present >= 3:
+                self.infer_ancestral_components_from_samples_origin(ancestries_df)
 
-            self.infer_ancestral_components_from_reference_pop(ancestry_values)
+            self.infer_ancestral_components_from_reference_pop(ancestries_df)
 
-            try:
-                # Order by some available ancestry
-                populations = ["AMR", "EUR", "AFR", "EAS"]
-                pop_to_sort = ancestry_values.columns.intersection(populations)[0]
-                columns_order = ["population", "super_population", pop_to_sort]
-                ancestry_values.sort_values(columns_order)
-            except KeyError:
-                print(dataset_label, K, panel_label)
-                print(ancestry_values.columns.values)
-                print(ancestry_values.columns.values)
-                return ancestry_values
+            # Order by some available ancestry
+            populations = ["AMR", "EUR", "AFR"]
+            available_pops = ancestries_df.columns.intersection(populations)[0]
+            columns_order = ["population", "super_population", available_pops]
+            ancestries_df.sort_values(columns_order, inplace=True)
 
             # Arrange the hierarchical index
-            ancestry_values.reset_index(inplace=True)
-            ancestry_values["dataset"] = dataset_label
-            ancestry_values["K"] = K
-            ancestry_values["panel"] = panel_label
-            ancestry_values.set_index(["dataset", "K", "panel", "sample"],
+            ancestries_df.reset_index(inplace=True)
+            ancestries_df["dataset"] = dataset_label
+            ancestries_df["K"] = K
+            ancestries_df["panel"] = panel_label
+            ancestries_df.set_index(["dataset", "K", "panel", "sample"],
                                         inplace=True)
-            # return ancestry_values
 
-            dataframes.append(ancestry_values)
+            dataframes.append(ancestries_df)
 
         return pd.concat(dataframes)
 
@@ -83,27 +79,16 @@ class AdmixtureResults:
 
 
     def infer_ancestral_components_from_samples_origin(self, ancestries_df):
-        components = ancestries_df.groupby("super_population").mean().idxmax()
-        ancestries_df.rename(columns=components.to_dict(), inplace=True)
+        means = ancestries_df.groupby("super_population").mean()
+        max_continent_per_component = means.idxmax(axis=0).to_dict()
+        max_component_per_continent = means.idxmax(axis=1).to_dict()
 
+        guesses = {}
+        for continent, guessed_component in max_component_per_continent.items():
+            if continent == max_continent_per_component[guessed_component]:
+                guesses[guessed_component] = continent
 
-    #  def infer_ancestral_components__old(self, ancestries_df):
-        #  reference_populations = ["PEL", "GBR", "YRI", "CHB", "GIH"]
-
-        #  components = ancestries_df.groupby("population").mean().idxmax(axis=1)
-        #  components = components.loc[reference_populations].sort_values()
-        #  components.name = "Component"
-
-        #  thousand_genomes = ThousandGenomes()
-        #  pops_df = thousand_genomes.read_population_names()
-
-        #  components = pops_df.join(components).dropna()
-        #  components = components[["Super Population Code", "Component"]]
-        #  components["Component"] = components["Component"].astype(int)
-        #  components = components.reset_index(drop=True).set_index("Component")
-
-        #  components_dict = components["Super Population Code"].to_dict()
-        #  ancestries_df.rename(columns=components_dict, inplace=True)
+        ancestries_df.rename(columns=guesses, inplace=True)
 
 
     def infer_ancestral_components_from_reference_pop(self, ancestries_df):
