@@ -6,7 +6,7 @@ import pandas as pd
 
 GALANTER_FILENAME = "~/tesina/files/galanter_SNPs.csv"
 LAT1_FILENAME = "~/tesina/affy-LAT1/Axiom_GW_LAT.na35.annot.csv"  # 1.1Gb
-CONTROL_PANEL_FILENAME_TEMPLATE ="~/tesina/1000Genomes_data/new_control_panels/cpx{}.ALL.parsed.traw"
+CONTROL_PANEL_FILENAME_TEMPLATE ="~/tesina/1000Genomes_data/new_control_panels/CPx{}.parsed.traw"
 
 class PanelCreator:
     def _create_galanter_df(self, filename):
