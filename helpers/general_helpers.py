@@ -21,6 +21,7 @@ def generate_panel_names(panels):
     for panel_label, panel in panels.items():
         snp_count = len(panels[panel_label])
         name = "{0} · {1:,} SNPs".format(panel_label, snp_count)
-        panel_names[panel_label] = name.replace(",", ".")
+
+        panel_names[panel_label] = name.replace(",", ".").replace("_", " ")
 
     return panel_names
