@@ -38,14 +38,13 @@ class AdmixtureAncestries:
 
         self._plot_aesthetics(ax, plot_title, K)
 
-        if not isdir(PLOTS_DIR):
-            makedirs(PLOTS_DIR)
-
-        filename = "{}_{}_{}".format(dataset_label, K, panel_label)
-        filepath = join(PLOTS_DIR, filename)
+        filename = "{}__{}__{}".format(dataset_label, panel_label, K)
+        subdir = join(PLOTS_DIR, "{}__{}".format(panel_label, dataset_label))
+        makedirs(subdir, exist_ok=True)
+        filepath = join(subdir, filename)
         self._save_figure_to_disk(fig, filepath)
 
-        # Round ratios (more human readable) for presentation in tables
+        # Round ratios for a human readable presentation in tables
         mean_ancestries = mean_ancestries.applymap(self._round_ratio)
         self._save_latex_table_to_disk(mean_ancestries, filepath)
 
