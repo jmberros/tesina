@@ -1,9 +1,12 @@
-# Ancestries
-AFR: Black
-EUR: White
-AMR: Red
-EAS: Yellow
-SAS: Brown
+# Continental populations
+AMR: "#e41a1c"
+EUR: "#377eb8"
+AFR: "#4daf4a"
+EAS: "#f781bf"
+SAS: "#984ea3"
+
+other_colors: ["#a65628", "#ff7f00", "#999999", "#a6cee3", "#b2df8a",
+               "#cab2d6", "#ffff99"]
 
 # Africa
 LWK: Red

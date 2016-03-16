@@ -1,3 +1,5 @@
+import numpy as np
+
 from .general_helpers import load_yaml
 
 
@@ -52,12 +54,17 @@ def hide_spines_and_ticks(ax, spines=["top", "right", "left"]):
     #  ax.yaxis.set_ticks_position("none")
 
 
+def ancestral_components_order(K):
+    return ["AMR", "EUR", "AFR", "EAS", "SAS"] + list(np.arange(K))
+
+
 def population_markers(population_code):
     return load_yaml("./settings/population_markers.yml")[population_code]
 
 
-def population_colors(population_code):
-    return load_yaml("./settings/population_colors.yml")[population_code]
+def population_colors(population_code=None):
+    dic = load_yaml("./settings/population_colors.yml")
+    return dic[population_code] if population_code else dic
 
 
 def panel_colors(panel_label):

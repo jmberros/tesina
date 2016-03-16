@@ -1,7 +1,7 @@
 import pandas as pd
 
 from os import popen
-from os.path import join
+from os.path import join, expanduser
 from itertools import product
 from pandas import DataFrame
 from collections import defaultdict, OrderedDict
@@ -10,12 +10,12 @@ from panels.thousand_genomes import ThousandGenomes
 from datasets.dataset_creator import DatasetCreator
 
 
-ADMIXTURE_DIR = "/home/juan/tesina/admixture"
+ADMIXTURE_DIR = expanduser("~/tesina/admixture")
 
 class AdmixtureResults:
     # ancestral_components = {0: 'EUR', 1: 'NAM', 2: 'AFR', 3: 'EAS', 4: 'SAS'}
 
-    def read_ancestry_files(self):
+    def read_ancestry_files(self, only_optimal_Ks=False):
         dataframes = []
 
         datasets = DatasetCreator().definitions("datasets")
@@ -24,8 +24,8 @@ class AdmixtureResults:
 
         for dataset_label, K, panel_label in product(datasets, Ks, panels):
 
-            #  if self.optimal_Ks()[dataset_label] != K:
-                #  continue
+            if only_optimal_Ks and self.optimal_Ks()[dataset_label] != K:
+                continue
 
             fdir = "~/tesina/admixture/{}_{}/".format(dataset_label,
                                                         panel_label)
