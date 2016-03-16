@@ -16,17 +16,15 @@ class DatasetCreator():
     def definitions(self, key=None):
         d = load_yaml("./settings/dataset_definitions.yml")
 
-        # Hack to get list from the keys of a YAML mapping
-        for k, val in d["populations_per_group"].items():
-            d["populations_per_group"][k] = list(d["populations_per_group"][k])
-
         if key:
             return d[key]
-        else:
-            return d
+
+        return d
+
 
     def datasets():
         return definitions("datasets")
+
 
     def populations_per_dataset(self):
         datasets = self.definitions("datasets")
@@ -41,6 +39,17 @@ class DatasetCreator():
             od[dataset_label] = populations
 
         return od
+
+
+    def populations_plot_order(self):
+        pop_groups = self.definitions("plot_order")
+        populations_per_group = self.definitions("populations_per_group")
+
+        populations = []
+        for pop_group in pop_groups:
+            populations.extend(populations_per_group[pop_group])
+
+        return populations
 
 
     def dataset_names(self):

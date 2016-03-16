@@ -15,7 +15,7 @@ from panels.thousand_genomes import ThousandGenomes
 from settings.genome import create_genome_df
 
 from helpers.plot_helpers import hide_spines_and_ticks
-from helpers.general_helpers import debug, generate_panel_names
+from helpers.general_helpers import debug
 
 
 pd.options.display.max_columns = 40  # Affy csv has 30 fields
@@ -37,7 +37,7 @@ del(panels["GAL_Faltantes"])  # I never use this one
 panel_labels = panel_creator.panel_labels()
 debug("'panel_labels'")
 
-panel_names = generate_panel_names(panels)
+panel_names = panel_creator.generate_panel_names()
 debug("'panel_names' dict")
 
 panel_rsIDs = OrderedDict()
@@ -58,15 +58,16 @@ debug("'control_rsIDs' dict to filter it ^")
 cp_factors = panel_creator.cp_factors
 debug("'cp_factors' list")
 
-#  control_labels = ["CPx{}".format(factor) for factor in cp_factors]
 control_labels = panel_creator.control_labels()
 debug("'control_labels'")
 
+all_panel_labels = panel_labels + control_labels
+
 control_names = OrderedDict()
-for factor, rsIDs in control_rsIDs.items():
+for label, rsIDs in control_rsIDs.items():
     snp_count = len(rsIDs)
     control_panel_name = "Panel de {0:,} SNPs".format(snp_count)
-    control_names[factor] = control_panel_name.replace(",", ".")
+    control_names[label] = control_panel_name.replace(",", ".")
 debug("'control_names' dict")
 
 thousand_genomes = ThousandGenomes()

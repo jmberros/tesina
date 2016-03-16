@@ -85,7 +85,7 @@ class ThousandGenomes:
 
         for panel_label in panel_labels:
             for level in mafs:
-                fn = POP_FREQS_TEMPLATES[level].format(panel_label.lower())
+                fn = POP_FREQS_TEMPLATES[level].format(panel_label)
                 df = pd.read_csv(fn, engine="python", sep="\s*")
                 df = df.pivot_table(values="MAF", index="SNP", columns="CLST")
                 df = df.applymap(lambda freq: 1 - freq if freq > 0.5 else freq)

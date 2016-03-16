@@ -24,7 +24,6 @@ class AdmixtureResults:
 
         for dataset_label, K, panel_label in product(datasets, Ks, panels):
 
-            # Comment this if you wanna get every result
             #  if self.optimal_Ks()[dataset_label] != K:
                 #  continue
 
@@ -54,12 +53,6 @@ class AdmixtureResults:
                 self.infer_ancestral_components_from_samples_origin(ancestries_df)
 
             self.infer_ancestral_components_from_reference_pop(ancestries_df)
-
-            # Order by some available ancestry
-            populations = ["AMR", "EUR", "AFR"]
-            available_pops = ancestries_df.columns.intersection(populations)[0]
-            columns_order = ["population", "super_population", available_pops]
-            ancestries_df.sort_values(columns_order, inplace=True)
 
             # Arrange the hierarchical index
             ancestries_df.reset_index(inplace=True)
@@ -105,7 +98,7 @@ class AdmixtureResults:
         guess = {}
         for component, ancestry in zip(components_order, reference_ancestries):
             if type(component) != int:
-                continue  # Don't re-guess already known ancestries 
+                continue  # Don't re-guess already known ancestries
 
             ancestries_already_inferred = [col for col in ancestries_df.columns
                                            if type(col) != int]

@@ -5,7 +5,7 @@ datasets:
     - LEAC
     - LEACI
 
-plot_order: [L, E, A, C, I]
+plot_order: [A, E, L, C, I]
 
 names:
     L: Latinos
@@ -16,10 +16,10 @@ names:
 
 populations_per_group:
     L:
-    - PEL
-    - MXL
-    - CLM
     - PUR
+    - CLM
+    - MXL
+    - PEL
     E:
     - IBS
     - GBR

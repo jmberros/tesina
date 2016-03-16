@@ -1,26 +1,26 @@
 from collections import OrderedDict
-from os.path import isfile, exists
+from os.path import isfile, exists, join
 from os import makedirs
 import pandas as pd
 
 
+PANELS_DIR="./dumpfiles"
 GALANTER_FILENAME = "~/tesina/files/galanter_SNPs.csv"
 LAT1_FILENAME = "~/tesina/affy-LAT1/Axiom_GW_LAT.na35.annot.csv"  # 1.1Gb
-CONTROL_PANEL_FILENAME_TEMPLATE ="~/tesina/1000Genomes_data/new_control_panels/CPx{}.parsed.traw"
+CONTROL_PANEL_FILENAME_TEMPLATE ="~/tesina/1000Genomes_data/new_control_panels/{}.parsed.traw"
 
 class PanelCreator:
     def _create_galanter_df(self, filename):
         df = pd.read_csv(filename)
-        df.set_index('SNP rsID', inplace=True, verify_integrity=True)
         return df
 
 
-    def _create_Affymetrix_df(self, filename):
-        # Reads the big file in chunks
-        tp = pd.read_csv(filename, comment="#", iterator=True, chunksize=1000)
-        lat = pd.concat(tp, ignore_index=True)  # Concats the chunks
-        lat.set_index("dbSNP RS ID", verify_integrity=False, inplace=True)
-        return lat
+    #  def _create_Affymetrix_df(self, filename):
+        #  # Reads the big file in chunks
+        #  tp = pd.read_csv(filename, comment="#", iterator=True, chunksize=1000)
+        #  lat = pd.concat(tp, ignore_index=True)  # Concats the chunks
+        #  lat.set_index("dbSNP RS ID", verify_integrity=False, inplace=True)
+        #  return lat
 
 
     def _split_present_and_missing(self, df, reference_df):
@@ -31,37 +31,34 @@ class PanelCreator:
         return (present, missing)
 
 
-    def read_AIMs_panels(self, dumpdir="dumpfiles"):
-        """Returns three dataframes: (1) the original df, (2) the one with the
-        elements found in the reference df, (3) another df with the elements
-        not found in the reference df. It also dumps the results to disk,
-        for later reading."""
+    def read_AIMs_panels(self):
+        panels = OrderedDict()
+        panels["GAL_Completo"] = pd.read_csv(GALANTER_FILENAME,
+                                             index_col="SNP rsID")
 
-        galanter = self._create_galanter_df(GALANTER_FILENAME)
-        dumpfiles = (dumpdir + "/" + "galanter_present.csv",
-                     dumpdir + "/" + "galanter_missing.csv")
+        dumpfiles = (join(PANELS_DIR, "galanter_present.csv"),
+                     join(PANELS_DIR, "galanter_missing.csv"))
 
         if not isfile(dumpfiles[0]) or not isfile(dumpfiles[1]):
-            lat = self._create_Affymetrix_df(LAT1_FILENAME)
+            lat = self.read_Affy_panel(LAT1_FILENAME)
             present, missing = self._split_present_and_missing(galanter, lat)
-            lat = None  # Hope the GC will take care of this ~1Gb object
-            if not exists(dumpdir):
-                makedirs(dumpdir)
+            del(lat)
+
+            if not exists(PANELS_DIR):
+                makedirs(PANELS_DIR)
+
             present.to_csv(dumpfiles[0])
             missing.to_csv(dumpfiles[1])
 
-        present = pd.read_csv(dumpfiles[0], index_col="SNP rsID")
-        missing = pd.read_csv(dumpfiles[1], index_col="SNP rsID")
+        panels["GAL_Affy"] = pd.read_csv(dumpfiles[0], index_col="SNP rsID")
+        panels["GAL_Faltantes"] = pd.read_csv(dumpfiles[1], index_col="SNP rsID")
 
         # TODO: this should be somewhere else?
         # Remove the biallelic SNP rs13327370
-        for panel in [galanter, missing]:
-            panel.drop("rs13327370", inplace=True)
-
-        panels = OrderedDict()
-        panels["GAL_Completo"] = galanter
-        panels["GAL_Affy"] = present
-        panels["GAL_Faltantes"] = missing
+        for panel in panels.values():
+            biallelic_snp = "rs13327370"
+            if biallelic_snp in panel.index:
+                panel.drop(biallelic_snp, inplace=True)
 
         return panels
 
@@ -78,20 +75,22 @@ class PanelCreator:
 
     def read_control_panels(self):
         control_rsIDs = OrderedDict()
-        df_list = {}
+        control_genotypes = None
 
-        for factor in self.cp_factors():
-            fn = CONTROL_PANEL_FILENAME_TEMPLATE.format(factor)
+        for label in self.control_labels():
+            fn = CONTROL_PANEL_FILENAME_TEMPLATE.format(label)
             df = pd.read_csv(fn, sep="\t", index_col="SNP").transpose()
             df.index = [sample.split("_")[0] for sample in df.index]
-            control_rsIDs[factor] = df.columns
-            df_list[factor] = df
-
-        temp_df = self._merge_genotype_dataframes(df_list["1"], df_list["10"])
-        control_genotypes = self._merge_genotype_dataframes(temp_df,
-                                                            df_list["100"])
-
-        del(df_list, temp_df)  # Trigger garbage collection
+            control_rsIDs[label] = df.columns
+            if control_genotypes is None:
+                # ^ will throw warning when it's a df if I just ask for its
+                # boolean value, hence the == None comparison.
+                control_genotypes = df
+            else:
+                control_genotypes = self._merge_genotype_dataframes(
+                    control_genotypes,
+                    df
+                )
 
         return control_rsIDs, control_genotypes
 
@@ -119,3 +118,38 @@ class PanelCreator:
         return ["1", "10", "100"]
 
 
+    def generate_panel_names(self):
+        panels = self.read_AIMs_panels()
+        panel_names = OrderedDict()
+
+        for panel_label, panel in panels.items():
+            snp_count = len(panel)
+            name = "{0} · {1:,} SNPs".format(panel_label, snp_count)
+            panel_names[panel_label] = name.replace(",", ".").replace("_", " ")
+
+        return panel_names
+
+
+    def generate_control_names(self):
+        control_rsIDs, = self.read_control_panels()
+        control_names = OrderedDict()
+
+        for label, rsIDs in control_rsIDs.items():
+            snp_count = len(rsIDs)
+            control_panel_name = "Panel de {0:,} SNPs".format(snp_count)
+            control_names[label] = control_panel_name.replace(",", ".")
+
+        return control_names
+
+
+    def hardcoded_control_names(self):
+        # I created this method because #generate_control_names takes too long
+        control_names = OrderedDict()
+        control_names["CPx1"] = "Panel de 438 SNPs"
+        control_names["CPx10"] = "Panel de 4.424 SNPs"
+        control_names["CPx100"] = "Panel de 43.144 SNPs"
+        return control_names
+
+
+    def all_panel_names(self):
+        return {**self.generate_panel_names(), **self.hardcoded_control_names()}
