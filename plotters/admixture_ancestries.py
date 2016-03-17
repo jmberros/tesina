@@ -53,9 +53,7 @@ class AdmixtureAncestries:
 
         show_plot and plt.show()
 
-        del(df_lite, ax, fig, N_by_population)
-        plt.close()
-
+        fig.clf()
 
     def plot_population_means(self, dataset_label, K, panel_label,
                               ancestries_df, show_plot=True):
@@ -91,8 +89,7 @@ class AdmixtureAncestries:
             print(mean_ancestries.applymap(self._round_ratio))
             plt.show()
 
-        del(df_lite, mean_ancestries, ax, fig)
-        plt.close()
+        fig.clf()
 
 
     def plot_all(self, ancestries_df=None):
@@ -100,16 +97,9 @@ class AdmixtureAncestries:
             ancestries_df = AdmixtureResults().read_ancestry_files()
 
         for multi_index, df in ancestries_df.groupby(level=[0, 1, 2]):
-            print(multi_index)
             self.plot_population_means(*multi_index, ancestries_df,
                                        show_plot=False)
-            self.print_free_mem()
             self.plot_per_sample(*multi_index, ancestries_df, show_plot=False)
-            self.print_free_mem()
-            print("Collecting garbage")
-            gc.collect()
-            self.print_free_mem()
-            print()
 
 
     def print_free_mem(self):
