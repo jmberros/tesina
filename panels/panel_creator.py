@@ -144,6 +144,7 @@ class PanelCreator:
 
     def hardcoded_control_names(self):
         # I created this method because #generate_control_names takes too long
+        # since it has to read the contorl panels to count the SNPs
         control_names = OrderedDict()
         control_names["CPx1"] = "Panel de 438 SNPs"
         control_names["CPx10"] = "Panel de 4.424 SNPs"
@@ -152,4 +153,7 @@ class PanelCreator:
 
 
     def all_panel_names(self):
-        return {**self.generate_panel_names(), **self.hardcoded_control_names()}
+        od = OrderedDict(self.generate_panel_names())
+        od.update(sefl.hardcoded_control_names())
+
+        return od

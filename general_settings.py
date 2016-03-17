@@ -62,6 +62,7 @@ control_labels = panel_creator.control_labels()
 debug("'control_labels'")
 
 all_panel_labels = panel_labels + control_labels
+all_panel_names = panel_creator.all_panel_names()
 
 control_names = OrderedDict()
 for label, rsIDs in control_rsIDs.items():
