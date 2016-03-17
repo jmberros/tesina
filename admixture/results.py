@@ -69,6 +69,11 @@ class AdmixtureResults:
         pass
 
 
+    def mean_ancestries_by_population(self, ancestries_df):
+        df = ancestries_df.set_index("population", append=True)
+        return df.groupby(level=df.index.names).mean()
+
+
     def infer_ancestral_components_from_samples_origin(self, ancestries_df):
         means = ancestries_df.groupby("super_population").mean()
         max_continent_per_component = means.idxmax(axis=0).to_dict()
