@@ -6,7 +6,6 @@ from os.path import join
 from itertools import product
 from datasets.dataset_creator import DatasetCreator
 from helpers.plot_helpers import panel_colors, remove_chartjunk, legend_subplot
-from helpers.general_helpers import generate_panel_names
 
 
 CV_ERRORS_FILE = "~/tesina/admixture/CV_error_summary.clean"

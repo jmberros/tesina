@@ -13,7 +13,6 @@ from datasets.dataset_creator import DatasetCreator
 ADMIXTURE_DIR = expanduser("~/tesina/admixture")
 
 class AdmixtureResults:
-    # ancestral_components = {0: 'EUR', 1: 'NAM', 2: 'AFR', 3: 'EAS', 4: 'SAS'}
 
     def read_ancestry_files(self, only_optimal_Ks=False):
         dataframes = []
@@ -59,8 +58,7 @@ class AdmixtureResults:
             ancestries_df["dataset"] = dataset_label
             ancestries_df["K"] = K
             ancestries_df["panel"] = panel_label
-            ancestries_df.set_index(["dataset", "K", "panel", "sample"],
-                                        inplace=True)
+            ancestries_df.set_index(["dataset", "K", "panel"], inplace=True)
 
             dataframes.append(ancestries_df)
 
