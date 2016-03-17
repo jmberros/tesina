@@ -3,6 +3,7 @@ from os.path import join
 from helpers.general_helpers import debug
 from panels.thousand_genomes import ThousandGenomes
 from datasets.dataset_creator import DatasetCreator
+from admixture.results import AdmixtureResults
 
 
 # Transform population codes into 1000 Genomes sample IDs
@@ -19,3 +20,5 @@ debug("'dataset_populations'")
 dataset_samples = dataset_creator.sample_IDs_per_dataset()
 debug("'dataset_samples' created and written to files")
 
+ancestries_df = AdmixtureResults().read_ancestry_files()
+debug("'ancestries_df' read from ADMIXTURE results")
