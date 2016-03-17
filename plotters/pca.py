@@ -94,7 +94,7 @@ class PCAPlotter:
                     x = pca_df[population_mask][components[0]]
                     y = pca_df[population_mask][components[1]]
                     s = ax.scatter(x, y, lw=lw, label=pop_label, marker=marker,
-                                   c=color, zorder=z, s=40)
+                                   c=color, zorder=z, s=40, alpha=0.75)
                     ax.set_axis_bgcolor("white")
                     ax.tick_params(axis="x", bottom="off",
                                    top="off", labelbottom="off")

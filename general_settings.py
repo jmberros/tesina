@@ -48,8 +48,9 @@ debug("'panel_rsIDs' dict")
 genome = create_genome_df()
 debug("'genome' dataframe")
 
-lat = panel_creator.read_Affy_panel()
-debug("'lat' dataframe")
+## Unnecessary for now
+#  lat = panel_creator.read_Affy_panel()
+#  debug("'lat' dataframe")
 
 control_rsIDs, control_genotypes = panel_creator.read_control_panels()
 debug("'control_genotypes' huge datagrame")
@@ -62,6 +63,7 @@ control_labels = panel_creator.control_labels()
 debug("'control_labels'")
 
 all_panel_labels = panel_labels + control_labels
+all_panel_names = panel_creator.all_panel_names()
 
 control_names = OrderedDict()
 for label, rsIDs in control_rsIDs.items():
