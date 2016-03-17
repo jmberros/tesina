@@ -52,7 +52,7 @@ class DatasetCreator():
         return populations
 
 
-    def dataset_names(self):
+    def dataset_names(self, key=None):
         datasets = self.definitions("datasets")
         names_per_group = self.definitions("names")
 
@@ -63,6 +63,9 @@ class DatasetCreator():
                 group_names.append(names_per_group[group])
 
             d[dataset_label] = ", ".join(group_names)
+
+        if key:
+            return d[key]
 
         return d
 

@@ -149,11 +149,20 @@ class PanelCreator:
         control_names["CPx1"] = "Panel de 438 SNPs"
         control_names["CPx10"] = "Panel de 4.424 SNPs"
         control_names["CPx100"] = "Panel de 43.144 SNPs"
+
         return control_names
 
 
     def all_panel_names(self):
         od = OrderedDict(self.generate_panel_names())
         od.update(self.hardcoded_control_names())
+
+        return od
+
+
+    def panel_groups(self):
+        od = OrderedDict()
+        od["GAL"] = self.panel_labels()
+        od["CP"] = self.control_labels()
 
         return od

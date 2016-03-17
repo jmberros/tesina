@@ -1,3 +1,4 @@
+import gc
 import seaborn as sns
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -52,6 +53,7 @@ class AdmixtureAncestries:
 
         show_plot and plt.show()
 
+        del(df_lite, ax, fig, N_by_population)
         plt.close()
 
 
@@ -89,6 +91,7 @@ class AdmixtureAncestries:
             print(mean_ancestries.applymap(self._round_ratio))
             plt.show()
 
+        del(df_lite, mean_ancestries, ax, fig)
         plt.close()
 
 
@@ -97,9 +100,25 @@ class AdmixtureAncestries:
             ancestries_df = AdmixtureResults().read_ancestry_files()
 
         for multi_index, df in ancestries_df.groupby(level=[0, 1, 2]):
+            print(multi_index)
             self.plot_population_means(*multi_index, ancestries_df,
                                        show_plot=False)
+            self.print_free_mem()
             self.plot_per_sample(*multi_index, ancestries_df, show_plot=False)
+            self.print_free_mem()
+            print("Collecting garbage")
+            gc.collect()
+            self.print_free_mem()
+            print()
+
+
+    def print_free_mem(self):
+        with open("/proc/meminfo") as mem:
+            meminfo = mem.read()
+
+        print("Free MEM:",
+            round(int(meminfo.split("\n")[2].split()[1]) // 1024 / 1024, 2),
+            "Gb")
 
 
     def _reorder_populations_and_components(self, df, K):
@@ -169,5 +188,4 @@ class AdmixtureAncestries:
 
     def _round_ratio(self, ratio):
         return round(ratio, 2)
-
 
