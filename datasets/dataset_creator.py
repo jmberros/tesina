@@ -41,17 +41,6 @@ class DatasetCreator():
         return od
 
 
-    def populations_plot_order(self):
-        pop_groups = self.definitions("plot_order")
-        populations_per_group = self.definitions("populations_per_group")
-
-        populations = []
-        for pop_group in pop_groups:
-            populations.extend(populations_per_group[pop_group])
-
-        return populations
-
-
     def dataset_names(self, key=None):
         datasets = self.definitions("datasets")
         names_per_group = self.definitions("names")

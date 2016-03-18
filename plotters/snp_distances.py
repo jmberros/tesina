@@ -5,6 +5,7 @@ import seaborn as sns
 
 from os import makedirs
 from os.path import join, expanduser
+from collections import OrderedDict
 
 from panels.panel_creator import PanelCreator
 from panels.panel_analyser import PanelAnalyser
@@ -17,6 +18,7 @@ PLOTS_DIR = expanduser("~/tesina/charts/panel_analyses")
 class SnpDistances:
     def __init__(self):
         makedirs(PLOTS_DIR, exist_ok=True)
+
 
     def chromosomes_with_SNPs_plot(self, panel_df):
         genome = create_genome_df()
