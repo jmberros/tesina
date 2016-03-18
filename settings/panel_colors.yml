@@ -1,6 +1,16 @@
+## Light set 'Pastel1'
 GAL_Affy: "#7fc97f"
 GAL_Completo: "#fdc086"
 
 CPx1: "#ffff99"
 CPx10: "#beaed4"
 CPx100: "#386cb0"
+
+## Darker set 'Dark2'
+# GAL_Affy: "#1b9e77"
+# GAL_Completo: "#7570b3"
+# GAL_Faltantes: "#d95f02"
+
+# CPx1: "#e7298a"
+# CPx10: "#66a61e"
+# CPx100: "#e6ab02"
