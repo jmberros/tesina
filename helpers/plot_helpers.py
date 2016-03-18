@@ -67,6 +67,10 @@ def population_colors(population_code=None):
     return dic[population_code] if population_code else dic
 
 
-def panel_colors(panel_label):
-    return load_yaml("./settings/panel_colors.yml")[panel_label]
+def panel_colors(key=None):
+    d = load_yaml("./settings/panel_colors.yml")
+    if key:
+        return d[key]
+    else:
+        return d
 

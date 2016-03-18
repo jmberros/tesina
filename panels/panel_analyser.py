@@ -5,8 +5,6 @@ import matplotlib.pyplot as plt
 from pandas import DataFrame, Series
 from collections import defaultdict
 from matplotlib import cm
-from data_munging.distances import snp_distances_per_chromosome
-from data_munging.distances import snp_distances_stats
 from helpers.data_munging_functions import annotate_bars
 
 
@@ -98,7 +96,7 @@ class PanelAnalyser:
         return ax
 
 
-    def _distances_between_positions(self, positions, chromosome, genome):
+    def _distances_between_markers(self, positions, chromosome, genome):
         """Returns a list of the distances between adjacent SNPs in a chromosome,
         and between the chromosome ends and the SNPs in the extremes."""
 
@@ -118,27 +116,10 @@ class PanelAnalyser:
         # positions_and_end   = [snp1      , snp2 , snp3 , snp4 , chr_end]
         # positions_and_start = [chr_start , snp1 , snp2 , snp3 , snp4   ]
 
-        # positions_and_start = np.hstack([[0], positions])
         positions_and_start = np.insert(positions, 0, 0)
         positions_and_end = np.append(positions, chr_end)
 
         return positions_and_end - positions_and_start
-
-
-    def snp_distances_per_chromosome__OLD(self, panel_df, genome):
-        """Returns the list of distances between markers, per chromosome"""
-        distances = defaultdict(list)
-
-        for chrom in panel_df["chr"].unique():
-            positions = panel_df[panel_df["chr"] == chrom].position
-            if len(positions) < 2:
-                # There's no point calculating distances between 1 SNP and its
-                # chromosome limits
-                distances[chrom] = [0]  # This is expected to be an array of numbers
-                continue
-            distances[chrom] = self._distances_between_positions(positions, chrom, genome)
-
-        return dict(distances)
 
 
     def snp_distances_per_chromosome(self, panel_df, genome):
@@ -149,12 +130,20 @@ class PanelAnalyser:
             if len(positions) < 2:
                 s = Series([0])
             else:
-                distances = self._distances_between_positions(positions, chrom, genome)
+                distances = self._distances_between_markers(positions, chrom, genome)
                 s = Series(distances)
             s.name = chrom
             series_list.append(s)
 
-        return series_list
+        #  return series_list
+        df = DataFrame(series_list)
+        df.index.name = "chromosome"
+        df.reset_index(inplace=True)
+        df["panel"] = panel_df.name
+        df.set_index(["panel", "chromosome"], inplace=True)
+
+        return df
+
 
     def snp_distances_stats(distances):
         """Returns mean, std, and median for distance lists per chromosome"""

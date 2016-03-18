@@ -12,7 +12,7 @@ from collections import OrderedDict
 
 from panels.panel_creator import PanelCreator
 from panels.thousand_genomes import ThousandGenomes
-from settings.genome import create_genome_df
+from panels.genome import create_genome_df
 
 from helpers.plot_helpers import hide_spines_and_ticks
 from helpers.general_helpers import debug

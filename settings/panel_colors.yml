@@ -1,6 +1,6 @@
-GAL_Completo: Blue
-GAL_Affy: Red
+GAL_Affy: "#7fc97f"
+GAL_Completo: "#fdc086"
 
-CPx1: Green
-CPx10: Magenta
-CPx100: Black
+CPx1: "#ffff99"
+CPx10: "#beaed4"
+CPx100: "#386cb0"

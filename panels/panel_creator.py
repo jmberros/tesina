@@ -53,6 +53,10 @@ class PanelCreator:
         panels["GAL_Affy"] = pd.read_csv(dumpfiles[0], index_col="SNP rsID")
         panels["GAL_Faltantes"] = pd.read_csv(dumpfiles[1], index_col="SNP rsID")
 
+        # Add names to the DFs
+        for label, panel in panels.items():
+            panel.name = label
+
         # TODO: this should be somewhere else?
         # Remove the biallelic SNP rs13327370
         for panel in panels.values():
