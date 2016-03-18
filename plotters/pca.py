@@ -1,12 +1,13 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
+from math import sqrt
 from os.path import join, expanduser
 from pandas import DataFrame
 from sklearn.decomposition import PCA
 from helpers import plot_helpers
 from panels.thousand_genomes import ThousandGenomes
-from helpers.plot_helpers import legend_subplot
+from helpers.plot_helpers import legend_subplot, grey_spines
 
 FIGS_DIR = expanduser("~/tesina/charts/PCAs")
 
@@ -54,7 +55,8 @@ class PCAPlotter:
 
         for ix, (panel_label, panel) in enumerate(rsIDs_per_panel.items()):
             dataset = dataset_genotypes.loc[:, panel].dropna(axis=1)
-            genotypes_matrix = dataset.values
+            normalized_dataset = dataset.apply(self._normalize_genotype_series)
+            genotypes_matrix = normalized_dataset.values
             pop_labels = samples.loc[dataset.index]["population"]
             pca = PCA()
             pcas.append(pca)
@@ -93,16 +95,10 @@ class PCAPlotter:
                     population_mask = pca_df["population"] == pop_label
                     x = pca_df[population_mask][components[0]]
                     y = pca_df[population_mask][components[1]]
-                    s = ax.scatter(x, y, lw=lw, label=pop_label, marker=marker,
-                                   c=color, zorder=z, s=40, alpha=0.75)
-                    ax.set_axis_bgcolor("white")
-                    ax.tick_params(axis="x", bottom="off",
-                                   top="off", labelbottom="off")
-                    ax.tick_params(axis="y", left="off",
-                                   right="off", labelleft="off")
-                    ax.grid(False)
-                    for spine in ax.spines.values():
-                        spine.set_edgecolor("silver")
+                    ax.scatter(x, y, lw=lw, label=pop_label, marker=marker,
+                               c=color, zorder=z, s=40, alpha=0.75)
+
+                    self._pca_plot_aesthetics(ax)
 
                     # Define inversion of axis to align components across plots
                     # Keep the reference population in the upper left
@@ -147,13 +143,28 @@ class PCAPlotter:
                      position=(0, 1.2), ha="left")
         plt.subplots_adjust(top=0.85)
 
+        filename += "__normalized"
         plt.savefig(join(FIGS_DIR, filename), facecolor="w")
         plt.show()
 
         return pcas
 
 
+    def _normalize_genotype_series(self, series):
+        # Taken from Patterson et al. 2006, doi:10.1371/journal.pgen.0020190
+        mu = series.mean()
+        p = mu/2
+        q = 1 - p
+
+        return (series - mu) / sqrt(p * q)
 
 
+    def _pca_plot_aesthetics(self, ax):
+        ax.set_axis_bgcolor("white")
+        ax.tick_params(axis="x", bottom="off", top="off", labelbottom="off")
+        ax.tick_params(axis="y", left="off", right="off", labelleft="off")
+        ax.grid(False)
+        grey_spines(ax)
 
+        return ax
 

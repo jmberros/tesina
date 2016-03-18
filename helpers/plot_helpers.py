@@ -87,3 +87,9 @@ def populations_plot_order():
 
     return populations
 
+
+def grey_spines(ax):
+    for spine in ax.spines.values():
+        spine.set_edgecolor("silver")
+    return ax
+
