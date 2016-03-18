@@ -150,9 +150,12 @@ class PanelCreator:
         return control_names
 
 
-    def all_panel_names(self):
+    def all_panel_names(self, key=None):
         od = OrderedDict(self.generate_panel_names())
         od.update(self.hardcoded_control_names())
+
+        if key:
+            return od[key]
 
         return od
 

@@ -48,9 +48,8 @@ debug("'panel_rsIDs' dict")
 genome = create_genome_df()
 debug("'genome' dataframe")
 
-## Unnecessary for now
-#  lat = panel_creator.read_Affy_panel()
-#  debug("'lat' dataframe")
+lat = panel_creator.read_Affy_panel()
+debug("'lat' dataframe")
 
 control_rsIDs, control_genotypes = panel_creator.read_control_panels()
 debug("'control_genotypes' huge datagrame")
