@@ -56,6 +56,7 @@ class PCAPlotter:
         for ix, (panel_label, panel) in enumerate(rsIDs_per_panel.items()):
             dataset = dataset_genotypes.loc[:, panel].dropna(axis=1)
             normalized_dataset = dataset.apply(self._normalize_genotype_series)
+            print(filename)
             genotypes_matrix = normalized_dataset.values
             pop_labels = samples.loc[dataset.index]["population"]
             pca = PCA()
@@ -156,7 +157,10 @@ class PCAPlotter:
         p = mu/2
         q = 1 - p
 
-        return (series - mu) / sqrt(p * q)
+        if mu == 0:
+            return series - mu
+        else:
+            return (series - mu) / sqrt(p * q)
 
 
     def _pca_plot_aesthetics(self, ax):
