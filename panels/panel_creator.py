@@ -15,14 +15,6 @@ class PanelCreator:
         return df
 
 
-    #  def _create_Affymetrix_df(self, filename):
-        #  # Reads the big file in chunks
-        #  tp = pd.read_csv(filename, comment="#", iterator=True, chunksize=1000)
-        #  lat = pd.concat(tp, ignore_index=True)  # Concats the chunks
-        #  lat.set_index("dbSNP RS ID", verify_integrity=False, inplace=True)
-        #  return lat
-
-
     def _split_present_and_missing(self, df, reference_df):
         """Splits a dataframe in two, according to presence or absence of its
         indices in the reference dataframe"""
@@ -65,6 +57,7 @@ class PanelCreator:
                 panel.drop(biallelic_snp, inplace=True)
 
         return panels
+
 
     def read_Affy_panel(self):
         cols_to_keep = ["dbSNP RS ID", "Chromosome", "Position End",
@@ -148,7 +141,7 @@ class PanelCreator:
 
     def hardcoded_control_names(self):
         # I created this method because #generate_control_names takes too long
-        # since it has to read the contorl panels to count the SNPs
+        # since it has to read the control panels to count the SNPs
         control_names = OrderedDict()
         control_names["CPx1"] = "Panel de 438 SNPs"
         control_names["CPx10"] = "Panel de 4.424 SNPs"

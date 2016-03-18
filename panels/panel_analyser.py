@@ -6,11 +6,57 @@ from pandas import DataFrame, Series
 from collections import defaultdict
 from matplotlib import cm
 from helpers.data_munging_functions import annotate_bars
+from helpers.general_helpers import thousands_separator, ratio_to_percentage
 
 
 class PanelAnalyser:
 
-    def snp_distances(galanter, present, genome):
+
+    def compare_panel_lengths(self, panels_dic, reference_label="GAL_Completo"):
+        ref_count = len(panels_dic[reference_label])
+
+        comparison = DataFrame({})
+        for label, panel in panels_dic.items():
+            s = Series({"AIMs count": len(panel)}, name=label)
+            comparison = comparison.append(s)
+
+        comparison = comparison.applymap(int)
+        comparison.sort_index(ascending=False, inplace=True)
+        comparison["Ratio"] = comparison["AIMs count"] / ref_count
+        comparison["Ratio"] = comparison["Ratio"].map(lambda x: round(x, 2))
+        comparison["AIMs count"] = comparison["AIMs count"].map(thousands_separator)
+        comparison.index.name = "Panel"
+
+        return comparison
+
+
+    def compare_AIMs_ancestry(self, panels_dic):
+        frames = []
+
+        for label, panel in panels_dic.items():
+            df = DataFrame({
+                "AIMs count": panel["population"].value_counts(),
+            })
+
+            df["Panel Percentage"] = df["AIMs count"] / len(panel)
+            df["Panel Percentage"] = df["Panel Percentage"].map(ratio_to_percentage)
+
+            frames.append(df)
+
+        return pd.concat(frames, axis=1, keys=panels_dic.keys())
+
+
+    def compare_LSBL(self, panels_dic):
+        frames = []
+        for label, panel in panels_dic.items():
+            grouped_sum = panel.groupby("population").sum()
+            frames.append(grouped_sum[["LSBL(Fst)", "LSBL(In)"]])
+
+        comparison = pd.concat(frames, axis=1, keys=panels_dic.keys())
+        return comparison.applymap(lambda x: round(x, 1))
+
+
+    def snp_distances(self, galanter, present, genome):
         galanter_snp_distances = snp_distances_per_chromosome(galanter, genome)
         galanter_snp_distances_stats = snp_distances_stats(galanter_snp_distances)
 
@@ -28,7 +74,7 @@ class PanelAnalyser:
                         present_snp_distances_stats], axis=1)
 
 
-    def galanter_vs_present_mean_distance_plot(galanter, present, genome):
+    def galanter_vs_present_mean_distance_plot(self, galanter, present, genome):
         df = snp_distances(galanter, present, genome)
         df = df[['mean_distance_galanter', 'mean_distance_present']]
 
@@ -50,7 +96,7 @@ class PanelAnalyser:
         return ax
 
 
-    def galanter_vs_present_median_distance_plot(galanter, present, genome):
+    def galanter_vs_present_median_distance_plot(self, galanter, present, genome):
         df = snp_distances(galanter, present, genome)
         df = df[['median_distance_galanter', 'median_distance_present']]
 
@@ -69,29 +115,6 @@ class PanelAnalyser:
         ax.set_yticklabels(yrange)  # Display as Mbp
         ax.legend([r"Mediana de las distancias en $Galanter_{TOTAL}$",
                 r"Mediana de las distancias en $Galanter_{IN}$"], loc='best')
-
-        return ax
-
-
-    def distances_boxplot(present, genome, title="", ax=None, **kwargs):
-        df = snp_distances_per_chromosome(present, genome)
-
-        if not ax:
-            ax = plt.subplot(111)
-
-        ax.boxplot(list(df.values()), positions=list(df.keys()),
-                   showfliers=False, patch_artist=True)# , **kwargs)
-
-        # Display 10 (Mbp) instead of 10.000.000
-        y_range = np.array(ax.get_yticks())
-        ax.set_yticklabels([int(y) for y in y_range // 10**6])
-
-        #  ax.set_title(title, y=1.08)
-
-        ax.set_ylabel("Distancia (Mpb)")
-        ax.set_xlabel("Cromosoma")
-
-        ax.yaxis.grid()
 
         return ax
 
