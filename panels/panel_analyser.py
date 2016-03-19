@@ -49,11 +49,11 @@ class PanelAnalyser:
     def compare_LSBL(self, panels_dic):
         frames = []
         for label, panel in panels_dic.items():
-            grouped_sum = panel.groupby("population").sum()
-            frames.append(grouped_sum[["LSBL(Fst)", "LSBL(In)"]])
+            lsbl_sum = panel.groupby("population").sum().filter(regex="LSBL")
+            lsbl_sum_rounded = lsbl_sum.applymap(lambda x: round(x, 1))
+            frames.append(lsbl_sum_rounded)
 
-        comparison = pd.concat(frames, axis=1, keys=panels_dic.keys())
-        return comparison.applymap(lambda x: round(x, 1))
+        return pd.concat(frames, axis=1, keys=panels_dic.keys())
 
 
     def snp_distances(self, galanter, present, genome):
