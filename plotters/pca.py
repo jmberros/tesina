@@ -15,7 +15,7 @@ FIGS_DIR = expanduser("~/tesina/charts/PCAs")
 class PCAPlotter:
     def plot(self, figtitle, rsIDs_per_panel, dataset_genotypes, samples,
              components_to_compare, panel_names, filename,
-             populations_to_plot):
+             populations_to_plot, normalize=True):
         """
         Use the rs IDs per panel to filter the dataset genotypes,
         so we can plot different panels alongside to compare the performance.
@@ -24,6 +24,8 @@ class PCAPlotter:
 
         The samples df is used to know each sample's population and color them.
         """
+
+        dataset_genotypes = dataset_genotypes.ix[samples.index]
 
         # Used to plot PCAs in the same "orientation" everytime
         reference_population = "PUR"
@@ -55,10 +57,10 @@ class PCAPlotter:
 
         for ix, (panel_label, panel) in enumerate(rsIDs_per_panel.items()):
             dataset = dataset_genotypes.loc[:, panel].dropna(axis=1)
-            normalized_dataset = dataset.apply(self._normalize_genotype_series)
-            print(filename)
-            genotypes_matrix = normalized_dataset.values
-            pop_labels = samples.loc[dataset.index]["population"]
+
+            if normalize:
+                dataset = dataset.apply(self._normalize_genotype_series)
+            genotypes_matrix = dataset.values
             pca = PCA()
             pcas.append(pca)
 
@@ -97,7 +99,7 @@ class PCAPlotter:
                     x = pca_df[population_mask][components[0]]
                     y = pca_df[population_mask][components[1]]
                     ax.scatter(x, y, lw=lw, label=pop_label, marker=marker,
-                               c=color, zorder=z, s=40, alpha=0.75)
+                               c=color, zorder=z, s=40, alpha=0.5)
 
                     self._pca_plot_aesthetics(ax)
 
@@ -109,11 +111,11 @@ class PCAPlotter:
 
                         # The median determines where most the scatter cloud is
                         reference_in_the_left = np.median(x) < xaxis_mean
-                        reference_in_the_top = np.median(y) > yaxis_mean
+                        reference_in_the_bottom = np.median(y) < yaxis_mean
 
                         if not reference_in_the_left:
                             ax.invert_xaxis()
-                        if not reference_in_the_top:
+                        if not reference_in_the_bottom:
                             ax.invert_yaxis()
 
                     handles, labels = ax.get_legend_handles_labels()
@@ -142,10 +144,11 @@ class PCAPlotter:
         plt.tight_layout()
         fig.suptitle(figtitle, fontsize=19, fontweight="bold",
                      position=(0, 1.2), ha="left")
-        plt.subplots_adjust(top=0.85)
+        plt.subplots_adjust(top=0.85, wspace=0.01)
 
-        filename += "__normalized"
-        plt.savefig(join(FIGS_DIR, filename), facecolor="w")
+        if normalize:
+            filename += "__normalized"
+        plt.savefig(join(FIGS_DIR, filename), facecolor="w", bbox_inches="tight")
         plt.show()
 
         return pcas

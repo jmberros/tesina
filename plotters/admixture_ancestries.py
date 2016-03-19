@@ -154,7 +154,7 @@ class AdmixtureAncestries:
 
     def _save_figure_to_disk(self, fig, filepath):
         plt.tight_layout()  # Without this it would get cropped
-        fig.savefig(filepath, facecolor="white")
+        fig.savefig(filepath, facecolor="white", bbox_inches="tight")
 
 
     def _save_latex_table_to_disk(self, df, filepath):

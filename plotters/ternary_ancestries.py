@@ -80,7 +80,7 @@ class TernaryAncestries:
     def _save_figure_to_disk(self, dataset_label, panel_group_label):
         makedirs(PLOTS_DIR, exist_ok=True)
         filename = "{}__{}".format(dataset_label, panel_group_label)
-        plt.savefig(join(PLOTS_DIR, filename), dpi=plt.gcf().dpi)
+        plt.savefig(join(PLOTS_DIR, filename), bbox_inches="tight")
 
 
     def _unique_dataset_and_K_check(self, ancestries_df):

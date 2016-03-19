@@ -166,3 +166,23 @@ class PanelCreator:
         od["CP"] = self.control_labels()
 
         return od
+
+
+    def generate_subpanel(self, panel, length, sort_key="LSBL(Fst)"):
+        sorted_panel = panel.sort_values(sort_key, ascending=False)
+        return sorted_panel.ix[:length, :].index.values
+
+
+    def generate_subpanels(self, panel, lengths):
+        subpanels = OrderedDict()
+        for length in lengths:
+            if length >= len(panel):
+                continue
+
+            subpanel = self.generate_subpanel(panel, length)
+            name = "{} AIMs".format(len(subpanel))
+            subpanels[name] = subpanel
+
+        return subpanels
+
+

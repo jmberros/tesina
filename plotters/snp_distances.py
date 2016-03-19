@@ -42,10 +42,9 @@ class SnpDistances:
 
         ax= self._chromosomes_plot_aesthetics(ax, genome)
 
-        # # Commenting this until the display vs save difference is solved :(
-        #  filename = "chromosomes_with_SNPs__{}".format(panel_df.name)
-        #  filepath = join(PLOTS_DIR, filename)
-        #  plt.savefig(filepath)
+        filename = "chromosomes_with_SNPs__{}".format(panel_df.name)
+        filepath = join(PLOTS_DIR, filename)
+        plt.savefig(filepath, bbox_inches="tight")
 
         return ax
 
