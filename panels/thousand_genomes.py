@@ -26,18 +26,14 @@ class ThousandGenomes:
         It can be filtered by sample_ids or SNP ids.
         """
 
-        samples = self.read_samples_data()
+        samples = self.samples()
         genotypes = self.read_genotypes()
 
-        if rs_ids:
-            genotypes = genotypes[rs_ids]
-            print("{} of {} rs IDs found".format(len(genotypes.columns),
-                                                 len(rs_ids)))
+        if rs_ids is not None:
+            genotypes = self._filter_by_rs_ids(genotypes, rs_ids)
 
-        if sample_ids:
-            genotypes = genotypes.loc[sample_ids]
-            print("{} of {} rs IDs found".format(len(genotypes.index),
-                                                 len(sample_ids)))
+        if sample_ids is not None:
+            genotypes = self._filter_by_sample_ids(genotypes, sample_ids)
 
         multi_index = ["super_population", "population", "gender", "sample"]
         df = samples.join(genotypes).reset_index().set_index(multi_index)
@@ -46,13 +42,16 @@ class ThousandGenomes:
         return df.sort_index()
 
 
-    def read_samples_data(self):
+    def samples(self, sample_ids=None):
         samples = pd.read_table(join(self.BASE_DIR, self.SAMPLES_FILENAME))
         samples = samples.rename(columns={'pop': 'population',
                                           'super_pop': 'super_population'})
 
         samples.dropna(axis=1, how='all', inplace=True)
         samples.set_index('sample', inplace=True)
+
+        if sample_ids is not None:
+            samples = self._filter_by_sample_ids(samples, sample_ids)
 
         return samples
 
@@ -73,6 +72,20 @@ class ThousandGenomes:
         df.to_csv(POP_NAMES_DUMFILE)
 
         return df
+
+
+    @staticmethod
+    def _filter_by_sample_ids(df, sample_ids):
+        # Assumes samples are indices
+        common_sample_ids = df.index.intersection(sample_ids)
+        return df.loc[sample_ids]
+
+
+    @staticmethod
+    def _filter_by_rs_ids(df, rs_ids):
+        # Assumes rs ids are columns
+        common_rs_ids = df.columns.intersection(rs_ids)
+        return df[common_rs_ids]
 
 
     def read_snps(self):
