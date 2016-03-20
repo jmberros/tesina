@@ -1,16 +1,12 @@
 import vcf
 import pandas as pd
 
-from os.path import isfile
+from os.path import isfile, expanduser, join
 
-
-SAMPLES_FILENAME = "~/tesina/1000Genomes_data/original-1000Genomes-files/" + \
-                   "integrated_call_samples_v3.20130502.ALL.panel"
 VCF_GALANTER = "~/tesina/1000G_analysis/galanter_1000Genomes.vcf"
-KG_SNPS_DUMPFILE = "./dumpfiles/1000G_SNPinfo_dataframe.csv"
-KG_GENOTYPES_DUMPFILE = "./dumpfiles/1000G_genotypes_dataframe.csv"
 POP_NAMES_DUMFILE = "/home/juan/tesina/1000Genomes_data/population_names.csv"
-KG_ALLELES_DUMPFILE = "./dumpfiles/1000G_genotypes_alleles_dataframe"
+KG_SNPS_DUMPFILE = "dumps/1000G_SNPinfo_dataframe.csv"
+KG_ALLELES_DUMPFILE = "dumps/1000G_genotypes_alleles_dataframe"
 POP_FREQS_TEMPLATES = {
     "population": "~/tesina/1000Genomes_data/galanter_beds/{}.populations.frq.strat",
     "superpopulation": "~/tesina/1000Genomes_data/galanter_beds/{}.superpopulations.frq.strat"
@@ -18,8 +14,40 @@ POP_FREQS_TEMPLATES = {
 
 
 class ThousandGenomes:
+    BASE_DIR = expanduser("~/tesina/1000Genomes_data")
+    GENOTYPES_FILE = "dumps/1000G_genotypes_dataframe.csv"
+    SAMPLES_FILENAME = join("original-1000Genomes-files",
+                            "integrated_call_samples_v3.20130502.ALL.panel")
+
+    def genotypes(self, rs_ids=None, sample_ids=None):
+        """
+        Generate a DataFrame of genotypes (allele dosage) with a MultiIndex of
+        continent > population > gender > sample.
+        It can be filtered by sample_ids or SNP ids.
+        """
+
+        samples = self.read_samples_data()
+        genotypes = self.read_genotypes()
+
+        if rs_ids:
+            genotypes = genotypes[rs_ids]
+            print("{} of {} rs IDs found".format(len(genotypes.columns),
+                                                 len(rs_ids)))
+
+        if sample_ids:
+            genotypes = genotypes.loc[sample_ids]
+            print("{} of {} rs IDs found".format(len(genotypes.index),
+                                                 len(sample_ids)))
+
+        multi_index = ["super_population", "population", "gender", "sample"]
+        df = samples.join(genotypes).reset_index().set_index(multi_index)
+        df.columns.name = "rs_id"
+
+        return df.sort_index()
+
+
     def read_samples_data(self):
-        samples = pd.read_table(SAMPLES_FILENAME)
+        samples = pd.read_table(join(self.BASE_DIR, self.SAMPLES_FILENAME))
         samples = samples.rename(columns={'pop': 'population',
                                           'super_pop': 'super_population'})
 
@@ -29,18 +57,11 @@ class ThousandGenomes:
         return samples
 
 
-    def read_snps(self):
-        if not isfile(KG_SNPS_DUMPFILE):
-            self._parse_and_dump_data()
-
-        return pd.read_csv(KG_SNPS_DUMPFILE, index_col='ID')
-
-
     def read_genotypes(self):
-        if not isfile(KG_GENOTYPES_DUMPFILE):
+        if not isfile(join(self.BASE_DIR, self.GENOTYPES_FILE)):
             self._parse_and_dump_data()
 
-        return pd.read_csv(KG_GENOTYPES_DUMPFILE, index_col=0)
+        return pd.read_csv(join(self.BASE_DIR, self.GENOTYPES_FILE), index_col=0)
 
 
     def read_population_names(self):
@@ -54,29 +75,11 @@ class ThousandGenomes:
         return df
 
 
-    def create_alleles_df(self, df_genotypes):
-        df = pd.DataFrame(index=df_genotypes.index)
+    def read_snps(self):
+        if not isfile(KG_SNPS_DUMPFILE):
+            self._parse_and_dump_data()
 
-        if not isfile(KG_ALLELES_DUMPFILE):
-            def genotype_code_to_alleles(code, ref, alt):
-                if code == 0:
-                    alleles = (ref, ref)
-                elif code == 1:
-                    alleles = (ref, alt)
-                elif code == 2:
-                    alleles = (alt, alt)
-                else:
-                    raise ValueError("I don't know genotype '{}'".format(code))
-
-                return ''.join(alleles)
-
-            for i, (rs, genotypes) in enumerate(df.iteritems()):
-                ref, alt = df_SNPs.loc[rs][['REF', 'ALT']]
-                df[rs] = genotypes.apply(genotype_code_to_alleles, args=(ref, alt))
-
-            df.to_csv(KG_ALLELES_DUMPFILE)
-
-        return pd.read_csv(KG_ALLELES_DUMPFILE, index_col=0)
+        return pd.read_csv(KG_SNPS_DUMPFILE, index_col='ID')
 
 
     def read_frequency_files(self):
@@ -109,7 +112,7 @@ class ThousandGenomes:
         frames = [pd.DataFrame(dict(genotypes), index=[rs])
                   for rs, genotypes in df_SNPs['sample_genotypes'].iteritems()]
         df_genotypes = pd.concat(frames).transpose()
-        df_genotypes.to_csv(KG_GENOTYPES_DUMPFILE)
+        df_genotypes.to_csv(join(self.BASE_DIR, self.GENOTYPES_FILE))
 
         # Remove big unnecessary field after exporting its data to 'samples_genotypes'
         df_SNPs = df_SNPs.drop('sample_genotypes', axis=1)
@@ -170,3 +173,29 @@ class ThousandGenomes:
         df = pd.DataFrame(records)
         df = df.set_index('ID')
         return df
+
+
+    # # I don't use this anymore. Commenting before deletion.
+    #  def create_alleles_df(self, df_genotypes):
+        #  df = pd.DataFrame(index=df_genotypes.index)
+
+        #  if not isfile(KG_ALLELES_DUMPFILE):
+            #  def genotype_code_to_alleles(code, ref, alt):
+                #  if code == 0:
+                    #  alleles = (ref, ref)
+                #  elif code == 1:
+                    #  alleles = (ref, alt)
+                #  elif code == 2:
+                    #  alleles = (alt, alt)
+                #  else:
+                    #  raise ValueError("I don't know genotype '{}'".format(code))
+
+                #  return ''.join(alleles)
+
+            #  for i, (rs, genotypes) in enumerate(df.iteritems()):
+                #  ref, alt = df_SNPs.loc[rs][['REF', 'ALT']]
+                #  df[rs] = genotypes.apply(genotype_code_to_alleles, args=(ref, alt))
+
+            #  df.to_csv(KG_ALLELES_DUMPFILE)
+
+        #  return pd.read_csv(KG_ALLELES_DUMPFILE, index_col=0)

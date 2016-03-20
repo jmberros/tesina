@@ -5,8 +5,8 @@ from math import sqrt
 from os.path import join, expanduser
 from pandas import DataFrame
 from sklearn.decomposition import PCA
-from helpers import plot_helpers
 from panels.thousand_genomes import ThousandGenomes
+from helpers import plot_helpers
 from helpers.plot_helpers import legend_subplot, grey_spines
 
 FIGS_DIR = expanduser("~/tesina/charts/PCAs")
@@ -56,7 +56,6 @@ class PCAPlotter:
         for ix, (panel_label, panel) in enumerate(rsIDs_per_panel.items()):
             dataset = dataset_genotypes.loc[:, panel].dropna(axis=1)
             normalized_dataset = dataset.apply(self._normalize_genotype_series)
-            print(filename)
             genotypes_matrix = normalized_dataset.values
             pop_labels = samples.loc[dataset.index]["population"]
             pca = PCA()
