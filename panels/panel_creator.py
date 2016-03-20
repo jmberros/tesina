@@ -1,7 +1,9 @@
+import pandas as pd
+
 from collections import OrderedDict
 from os.path import isfile, exists, join
 from os import makedirs
-import pandas as pd
+from .panel import Panel
 
 
 PANELS_DIR="./dumpfiles"
@@ -10,53 +12,38 @@ LAT1_FILENAME = "~/tesina/affy-LAT1/Axiom_GW_LAT.na35.annot.csv"  # 1.1Gb
 CONTROL_PANEL_FILENAME_TEMPLATE ="~/tesina/1000Genomes_data/new_control_panels/{}.parsed.traw"
 
 class PanelCreator:
-    def _create_galanter_df(self, filename):
-        df = pd.read_csv(filename)
-        return df
-
-
-    def _split_present_and_missing(self, df, reference_df):
-        """Splits a dataframe in two, according to presence or absence of its
-        indices in the reference dataframe"""
-        present = df[df.index.isin(reference_df.index)]
-        missing = df[~df.index.isin(reference_df.index)]
-        return (present, missing)
-
-
     def read_AIMs_panels(self):
         panels = OrderedDict()
-        panels["GAL_Completo"] = pd.read_csv(GALANTER_FILENAME,
-                                             index_col="SNP rsID")
+        panels["GAL_Completo"] = Panel(pd.read_csv(GALANTER_FILENAME, index_col="SNP rsID"))
 
         dumpfiles = (join(PANELS_DIR, "galanter_present.csv"),
                      join(PANELS_DIR, "galanter_missing.csv"))
 
-        if not isfile(dumpfiles[0]) or not isfile(dumpfiles[1]):
-            lat = self.read_Affy_panel(LAT1_FILENAME)
-            present, missing = self._split_present_and_missing(galanter, lat)
-            del(lat)
+        if not all([isfile(fn) for fn in dumpfiles]):
+            self.generate_AIMs_panels(dumpfiles, galanter)
 
-            if not exists(PANELS_DIR):
-                makedirs(PANELS_DIR)
+        panels["GAL_Affy"] = Panel(pd.read_csv(dumpfiles[0], index_col="SNP rsID"))
+        panels["GAL_Faltantes"] = Panel(pd.read_csv(dumpfiles[1], index_col="SNP rsID"))
 
-            present.to_csv(dumpfiles[0])
-            missing.to_csv(dumpfiles[1])
-
-        panels["GAL_Affy"] = pd.read_csv(dumpfiles[0], index_col="SNP rsID")
-        panels["GAL_Faltantes"] = pd.read_csv(dumpfiles[1], index_col="SNP rsID")
-
-        # Add names to the DFs
         for label, panel in panels.items():
-            panel.name = label
-
-        # TODO: this should be somewhere else?
-        # Remove the biallelic SNP rs13327370
-        for panel in panels.values():
-            biallelic_snp = "rs13327370"
-            if biallelic_snp in panel.index:
-                panel.drop(biallelic_snp, inplace=True)
+            panel.info = self.remove_biallelic_SNPs(panel.info)
+            panel.info.name = label
 
         return panels
+
+
+    def generate_AIMs_panels(self, dumpfiles):
+        if not exists(PANELS_DIR):
+            makedirs(PANELS_DIR)
+
+        lat = self.read_Affy_panel(LAT1_FILENAME)
+        df[df.index.isin(lat.index)].to_csv(dumpfiles[0])  # present
+        df[~df.index.isin(lat.index)].to_csv(dumpfiles[1])  # missing
+
+
+    def _create_galanter_df(self, filename):
+        df = pd.read_csv(filename)
+        return df
 
 
     def read_Affy_panel(self):
@@ -69,6 +56,7 @@ class PanelCreator:
         lat.sort_values(by=["Chromosome", "Position End"], inplace=True)
 
         return lat
+
 
     def read_control_panels(self):
         control_rsIDs = OrderedDict()
@@ -166,3 +154,11 @@ class PanelCreator:
         od["CP"] = self.control_labels()
 
         return od
+
+
+    def remove_biallelic_SNPs(self, panel):
+        # Check if the alt. allele is just ONE possible nucleotide
+        biallelic = panel["A2"].str.len() > 1
+
+        #  return panel
+        return panel[~biallelic]
