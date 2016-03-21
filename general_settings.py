@@ -91,6 +91,6 @@ debug("'df_1000G_genotypes_alleles'")
 def whois(pop_code):
     return df_1000G_population_names.loc[pop_code]['Population Description']
 
-mafs = thousand_genomes.read_frequency_files()
+mafs = thousand_genomes.mafs()
 debug("'mafs' dataframe")
 

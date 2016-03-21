@@ -6,24 +6,25 @@ from os import makedirs
 from .panel import Panel
 
 
-PANELS_DIR="~/tesina/dumpfiles"
-GALANTER_FILENAME = "~/tesina/files/galanter_SNPs.csv"
-LAT1_FILENAME = "~/tesina/affy-LAT1/Axiom_GW_LAT.na35.annot.csv"  # 1.1Gb
-CONTROL_PANEL_FILENAME_TEMPLATE ="~/tesina/1000Genomes_data/new_control_panels/{}.parsed.traw"
 
 class PanelCreator:
+    PANELS_DIR = "~/tesina/dumpfiles"
+    GALANTER_FILENAME = "~/tesina/files/galanter_SNPs.csv"
+    LAT1_FILENAME = "~/tesina/affy-LAT1/Axiom_GW_LAT.na35.annot.csv"  # 1.1Gb
+    CONTROL_PANEL_FILENAME_TEMPLATE ="~/tesina/1000Genomes_data/new_control_panels/{}.parsed.traw"
+
     def read_AIMs_panels(self):
         panels = OrderedDict()
-        panels["GAL_Completo"] = Panel(pd.read_csv(GALANTER_FILENAME, index_col="SNP rsID"))
+        panels["GAL_Completo"] = Panel(pd.read_csv(self.GALANTER_FILENAME, index_col="SNP rsID"))
 
-        dumpfiles = (join(PANELS_DIR, "galanter_present.csv"),
-                     join(PANELS_DIR, "galanter_missing.csv"))
+        dumpfiles = (join(self.PANELS_DIR, "galanter_present.csv"),
+                     join(self.PANELS_DIR, "galanter_missing.csv"))
 
         if not all([isfile(fn) for fn in dumpfiles]):
-            self.generate_AIMs_panels(dumpfiles, galanter)
+            self.generate_AIMs_panels(panels["GAL_Completo"], dumpfiles)
 
-        panels["GAL_Affy"] = Panel(pd.read_csv(dumpfiles[0], index_col="SNP rsID"))
-        panels["GAL_Faltantes"] = Panel(pd.read_csv(dumpfiles[1], index_col="SNP rsID"))
+        panels["GAL_Affy"] = Panel(pd.read_csv(dumpfiles[0], index_col="rs_id"))
+        panels["GAL_Faltantes"] = Panel(pd.read_csv(dumpfiles[1], index_col="rs_id"))
 
         for label, panel in panels.items():
             panel.info = self.remove_biallelic_SNPs(panel.info)
@@ -32,11 +33,12 @@ class PanelCreator:
         return panels
 
 
-    def generate_AIMs_panels(self, dumpfiles):
-        if not exists(PANELS_DIR):
-            makedirs(PANELS_DIR)
+    def generate_AIMs_panels(self, panel, dumpfiles):
+        if not exists(self.PANELS_DIR):
+            makedirs(self.PANELS_DIR)
 
-        lat = self.read_Affy_panel(LAT1_FILENAME)
+        lat = self.read_Affy_panel()
+        df = panel.info
         df[df.index.isin(lat.index)].to_csv(dumpfiles[0])  # present
         df[~df.index.isin(lat.index)].to_csv(dumpfiles[1])  # missing
 
@@ -49,7 +51,7 @@ class PanelCreator:
     def read_Affy_panel(self):
         cols_to_keep = ["dbSNP RS ID", "Chromosome", "Position End",
                         "Minor Allele Frequency"]
-        lat = pd.read_csv(LAT1_FILENAME, comment="#", index_col="dbSNP RS ID",
+        lat = pd.read_csv(self.LAT1_FILENAME, comment="#", index_col="dbSNP RS ID",
                           usecols=cols_to_keep)
         lat.drop(["---"], inplace=True)  # SNPs with no rs ID
         lat["Position End"] = lat["Position End"].astype(int)
@@ -63,7 +65,7 @@ class PanelCreator:
         control_genotypes = None
 
         for label in self.control_labels():
-            fn = CONTROL_PANEL_FILENAME_TEMPLATE.format(label)
+            fn = self.CONTROL_PANEL_FILENAME_TEMPLATE.format(label)
             df = pd.read_csv(fn, sep="\t", index_col="SNP").transpose()
             df.index = [sample.split("_")[0] for sample in df.index]
             control_rsIDs[label] = df.columns

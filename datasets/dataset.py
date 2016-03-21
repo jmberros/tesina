@@ -4,21 +4,52 @@ sys.path.insert(0, os.path.abspath("../helpers"))
 sys.path.insert(0, os.path.abspath("../panels"))
 
 
+from collections import OrderedDict
 from helpers.general_helpers import load_yaml
 from panels.thousand_genomes import ThousandGenomes
 
 
-# ME interesa pasarle un tag "LEA"
-# Y que me devuelva un objeto dataset LEA
-# con un dataframe de sample, pop, superpop, gender
 # al que le pueda pedir por separado: sus poblaciones [PEL, MXL, GBR ...]
 # sus superpoblaciones en orden de plot?
 
 
 class Dataset:
     def __init__(self, label):  # L, LE, LEA, LEAC ..
+        self.label = label
         self.name = self.make_name(label)
-        # all_samples = ThousandGenomes().samples()
+        self._thousand_genomes = ThousandGenomes()
+        self.pop_codes = self.populations_per_dataset(label)
+        self.sample_ids = self._thousand_genomes.samples_from_pop_codes(self.pop_codes).index
+
+
+    def __repr__(self):
+        template =  "<Dataset {} of {} populations, {} samples>"
+        return template.format(self.label, len(self.pop_codes), len(self.sample_ids))
+
+
+    #  # I should ask PANELS for genotypes, not datasets.
+    #  # How is a dataset supposed to choose the markers?
+    #  def genotypes(self):
+        #  return self._thousand_genomes.genotypes(sample_ids=self.sample_ids)
+
+
+    @classmethod
+    def populations_per_dataset(cls, key=None):
+        datasets = cls.definitions("datasets")
+        # [ L, LE, LEA ... ]
+
+        od = OrderedDict()
+        for dataset_label in datasets:  # L, LE, LEA ...
+            populations = []
+            for pop_group in list(dataset_label):  # L, E, A ...
+                pop_list = cls.definitions("populations_per_group")[pop_group]
+                populations.extend(pop_list)
+            od[dataset_label] = populations
+
+        if key:
+            return od[key]
+
+        return od
 
 
     @classmethod
