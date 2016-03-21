@@ -4,28 +4,54 @@ import numpy as np
 from math import sqrt
 from os.path import join, expanduser
 from pandas import DataFrame
+from sklearn.decomposition import PCA
 from panels.thousand_genomes import ThousandGenomes
 from helpers import plot_helpers
 from helpers.plot_helpers import legend_subplot, grey_spines
 
+FIGS_DIR = expanduser("~/tesina/charts/PCAs")
 
-# Que acepte un "sufijo" para los filenames!
-# Que reciba un dataframe de componentes principales con MultiIndex por population
-# Y un objeto pca???
-# Y que plottee y guarde a disco los plots
+
 class PCAPlotter:
-    FIGS_DIR = expanduser("~/tesina/charts/PCAs")
+    def plot(self, figtitle, rsIDs_per_panel, dataset_genotypes, samples,
+             components_to_compare, panel_names, filename,
+             populations_to_plot):
+        """
+        Use the rs IDs per panel to filter the dataset genotypes,
+        so we can plot different panels alongside to compare the performance.
 
-    def plot(self, components_df, components_to_compare, title):
+        PCA is run on that genotype matrix filtered by rs IDs.
+
+        The samples df is used to know each sample's population and color them.
+        """
 
         # Used to plot PCAs in the same "orientation" everytime
         reference_population = "PUR"
 
-        fig_width, fig_height = self.figsize(len(rsIDs_per_panel))
+        plot_width = 5
+        plot_height = 5
+
+        # TODO: fix this ugly hardcoding
+        if components_to_compare == [("PC1", "PC2")]:
+            n_cols = len(rsIDs_per_panel)
+        else:
+            # I only plot extra components for one panel in a different figure,
+            # so I only need the extra columns in that case, where the amount
+            # of panels is not equal to the number of columns.
+            n_cols = len(components_to_compare)
+            # The first two components are ploted elsewhere
+            figtitle += "\nComponentes Principales 3 a 8"
+
+        n_cols += 1  # Extra column for the legend in an empty axes
+        n_rows = 1
+        fig_width = plot_width * n_cols
+        fig_height = plot_height * n_rows
 
         fig = plt.figure(figsize=(fig_width, fig_height))
         axes = list(np.arange(n_cols * n_rows) + 1)
         axes.reverse()
+
+        pcas = []
 
         for ix, (panel_label, panel) in enumerate(rsIDs_per_panel.items()):
             dataset = dataset_genotypes.loc[:, panel].dropna(axis=1)
@@ -144,16 +170,4 @@ class PCAPlotter:
         grey_spines(ax)
 
         return ax
-
-
-    def _figsize(self, number_of_plots):
-        plot_width, plot_height = 5, 3
-        plots_per_row = 3
-
-        n_cols = 
-        n_rows = ceil((len(rsIDs_per_panel) + 1) // plots_per_row)
-        # +1 is an extra column for the legend in an empty axes
-
-        fig_width = plot_width * n_cols
-        fig_height = plot_height * n_rows
 
