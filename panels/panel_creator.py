@@ -1,12 +1,12 @@
 import pandas as pd
 
 from collections import OrderedDict
-from os.path import isfile, exists, join
+from os.path import isfile, exists, join, expanduser
 from os import makedirs
 from .panel import Panel
 
 
-PANELS_DIR="./dumpfiles"
+PANELS_DIR="~/tesina/dumpfiles"
 GALANTER_FILENAME = "~/tesina/files/galanter_SNPs.csv"
 LAT1_FILENAME = "~/tesina/affy-LAT1/Axiom_GW_LAT.na35.annot.csv"  # 1.1Gb
 CONTROL_PANEL_FILENAME_TEMPLATE ="~/tesina/1000Genomes_data/new_control_panels/{}.parsed.traw"
