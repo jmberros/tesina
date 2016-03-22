@@ -15,7 +15,8 @@ class PanelCreator:
 
     def read_AIMs_panels(self):
         panels = OrderedDict()
-        panels["GAL_Completo"] = Panel(pd.read_csv(self.GALANTER_FILENAME, index_col="SNP rsID"))
+        panels["GAL_Completo"] = Panel(pd.read_csv(self.GALANTER_FILENAME, index_col="SNP rsID"),
+                                                   "GAL_Completo")
 
         dumpfiles = (join(self.PANELS_DIR, "galanter_present.csv"),
                      join(self.PANELS_DIR, "galanter_missing.csv"))
@@ -23,12 +24,13 @@ class PanelCreator:
         if not all([isfile(fn) for fn in dumpfiles]):
             self.generate_AIMs_panels(panels["GAL_Completo"], dumpfiles)
 
-        panels["GAL_Affy"] = Panel(pd.read_csv(dumpfiles[0], index_col="rs_id"))
-        panels["GAL_Faltantes"] = Panel(pd.read_csv(dumpfiles[1], index_col="rs_id"))
+        panels["GAL_Affy"] = Panel(pd.read_csv(dumpfiles[0], index_col="rs_id"),
+                                               "GAL_Affy")
+        panels["GAL_Faltantes"] = Panel(pd.read_csv(dumpfiles[1], index_col="rs_id"),
+                                        "GAL_Faltantes")
 
         for label, panel in panels.items():
             panel.info = self.remove_biallelic_SNPs(panel.info)
-            panel.info.name = label
 
         return panels
 
@@ -61,6 +63,18 @@ class PanelCreator:
 
 
     def read_control_panels(self):
+        control_panels = OrderedDict()
+
+        for label in self.control_labels():
+            fn = self.CONTROL_PANEL_FILENAME_TEMPLATE.format(label)
+            df = pd.read_csv(fn, sep="\t", index_col="SNP").transpose()
+            df.index = [sample.split("_")[0] for sample in df.index]
+            control_panels[label] = Panel(df, label)
+
+        return control_panels
+
+
+    def read_control_panels_old(self):
         control_rsIDs = OrderedDict()
         control_genotypes = None
 
@@ -70,8 +84,6 @@ class PanelCreator:
             df.index = [sample.split("_")[0] for sample in df.index]
             control_rsIDs[label] = df.columns
             if control_genotypes is None:
-                # ^ will throw warning when it's a df if I just ask for its
-                # boolean value, hence the == None comparison.
                 control_genotypes = df
             else:
                 control_genotypes = self._merge_genotype_dataframes(

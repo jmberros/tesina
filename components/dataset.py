@@ -9,10 +9,6 @@ from helpers.general_helpers import load_yaml
 from panels.thousand_genomes import ThousandGenomes
 
 
-# al que le pueda pedir por separado: sus poblaciones [PEL, MXL, GBR ...]
-# sus superpoblaciones en orden de plot?
-
-
 class Dataset:
     def __init__(self, label):  # L, LE, LEA, LEAC ..
         self.label = label
@@ -25,12 +21,6 @@ class Dataset:
     def __repr__(self):
         template =  "<Dataset {} of {} populations, {} samples>"
         return template.format(self.label, len(self.pop_codes), len(self.sample_ids))
-
-
-    #  # I should ask PANELS for genotypes, not datasets.
-    #  # How is a dataset supposed to choose the markers?
-    #  def genotypes(self):
-        #  return self._thousand_genomes.genotypes(sample_ids=self.sample_ids)
 
 
     @classmethod
