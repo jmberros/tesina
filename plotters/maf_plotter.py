@@ -3,28 +3,31 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+from os import makedirs
+from os.path import expanduser, join
 from collections import OrderedDict
-from panels.thousand_genomes import ThousandGenomes
+from components.dataset import Dataset
+from sources.thousand_genomes import ThousandGenomes
 from helpers.plot_helpers import (panel_colors,
-                                  hide_spines_and_ticks,
-                                  populations_plot_order)
+                                  hide_spines_and_ticks)
 
 
 class MAFPlotter:
+    PLOTS_DIR = expanduser("~/tesina/charts/panel_analyses")
 
     def MAF_comparison_boxplot(self):
         long_format_mafs = self._generate_maf_long_df()
 
         populations_to_plot = {
             "superpopulation": ['AFR', 'EUR', 'AMR'],
-            "population": populations_plot_order(),
+            "population": Dataset.used_populations(),
         }
         for population_level, long_df in long_format_mafs.items():
             population_list = populations_to_plot[population_level]
             mask = long_df["population"].isin(population_list)
             long_df = long_df[mask]
-            fig_width = 9.5 if population_level == "population" else 5
-            fig = plt.figure(figsize=(fig_width, 3))
+            fig_width = 13 if population_level == "population" else 7
+            fig = plt.figure(figsize=(fig_width, 4))
             ax = fig.add_subplot(1, 1, 1)
 
             panel_labels = long_df["panel"].unique()
@@ -34,8 +37,10 @@ class MAFPlotter:
                         ax=ax, linewidth=0.3, showcaps=False, showfliers=False,
                         palette=sns.color_palette(colors), width=0.70)
 
-            legend_on = (population_level == "superpopulation")
-            self._boxplot_aesthetics(ax, legend_on=legend_on)
+            self._boxplot_aesthetics(ax)
+
+            filename = "MAF_comparison__{}".format(population_level)
+            plt.savefig(join(self.PLOTS_DIR, filename), bbox_inches="tight")
             plt.show()
 
 
@@ -47,19 +52,16 @@ class MAFPlotter:
         ax.set_xlabel("")
 
         ax.yaxis.labelpad = ax.xaxis.labelpad = 15
-
-        if legend_on:
-            ax.legend(loc="upper left", bbox_to_anchor=(0.9, 1.29), frameon=True)
-            ax.legend_.get_frame().set_facecolor("white")
-        else:
-            ax.legend_.set_visible(False)
+        ax.legend(loc="upper left", bbox_to_anchor=(0.8, 1.29),
+                  frameon=True)
+        ax.legend_.get_frame().set_facecolor("white")
 
         ax.yaxis.grid(linestyle="dotted")
         hide_spines_and_ticks(ax)
 
 
     def _generate_maf_long_df(self):
-        mafs = ThousandGenomes().read_frequency_files()
+        mafs = ThousandGenomes.mafs()
         long_format_mafs = OrderedDict()
 
         # population_level can be "population" or "superpopulation"

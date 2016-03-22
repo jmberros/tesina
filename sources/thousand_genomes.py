@@ -27,23 +27,6 @@ class ThousandGenomes:
         return df.sort_index()
 
 
-    #  def genotypes(self, rs_ids=None, sample_ids=None, pop_codes=None):
-        #  """
-        #  Generate a DataFrame of genotypes (allele dosage) with a MultiIndex of
-        #  continent > population > gender > sample.
-        #  It can be filtered by sample_ids or SNP ids.
-        #  """
-
-        #  samples = self._filter_by_sample_ids(self.all_samples, sample_ids)
-        #  genotypes = self._data_reader.read_genotypes()
-        #  genotypes = self._filter_by_rs_ids(genotypes, rs_ids)
-
-        #  multi_index = ["super_population", "population", "gender", "sample"]
-        #  df = samples.join(genotypes).reset_index().set_index(multi_index)
-        #  df.columns.name = "rs_id"
-
-        #  return df.sort_index()
-
     def samples_from_pop_codes(self, pop_codes):
         # Assumes pop_code as a column.
         missing = setdiff1d(pop_codes, self.all_samples["population"])
@@ -56,12 +39,14 @@ class ThousandGenomes:
         return filtered.reset_index().set_index("sample").dropna()
 
 
-    def mafs(self):
+    @classmethod
+    def mafs(cls):
         d = {"population": {}, "superpopulation": {}}
         panel_labels = ["GAL_Completo", "GAL_Affy"]  # Remove this
         for panel_label in panel_labels:
-            for level in mafs:
-                d[level][panel_label] = self.read_frequency_file(label, level)
+            for level in d.keys():
+                d[level][panel_label] = \
+                    cls.read_frequency_file(panel_label, level)
 
         return d
 

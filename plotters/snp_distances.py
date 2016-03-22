@@ -7,8 +7,8 @@ from os import makedirs
 from os.path import join, expanduser
 from collections import OrderedDict
 
-from panels.panel_creator import PanelCreator
-from panels.panel_analyser import PanelAnalyser
+from components.panel import Panel
+from components.panel_analyser import PanelAnalyser
 from panels.genome import create_genome_df
 from helpers.plot_helpers import panel_colors, hide_spines_and_ticks
 
@@ -20,7 +20,26 @@ class SnpDistances:
         makedirs(PLOTS_DIR, exist_ok=True)
 
 
-    def chromosomes_with_SNPs_plot(self, panel_df):
+    def snp_distances_comparison_boxplot(self, panel_labels):
+        distances_long_format = self._generate_distances_long_format()
+        mask = distances_long_format["panel"].isin(panel_labels)
+        distances = distances_long_format[mask]
+
+        fig = plt.figure(figsize=(12, 3))
+        ax = fig.add_subplot(1, 1, 1)
+
+        panel_labels = distances["panel"].unique()
+        colors = [v for k, v in panel_colors().items() if k in panel_labels]
+
+        sns.boxplot(x="chromosome", y="value", hue="panel", data=distances,
+                    ax=ax, linewidth=0.6, showcaps=False, showfliers=False,
+                    palette=sns.color_palette(colors))
+
+        self._boxplot_aesthetics(ax)
+        plt.show()
+
+
+    def chromosomes_with_SNPs_plot(self, panel):
         genome = create_genome_df()
         fig, ax = plt.subplots()
         chrom_linewidth = 0.75
@@ -37,12 +56,12 @@ class SnpDistances:
                     lw=chrom_linewidth)
 
         # SNPs
-        panel_df.plot(ax=ax, kind="scatter", x="chr", y="position", lw=0.5,
-                      title=PanelCreator().all_panel_names(panel_df.name))
+        panel.snps.plot(ax=ax, kind="scatter", x="chr", y="position", lw=0.5,
+                      title=panel.name)
 
         ax= self._chromosomes_plot_aesthetics(ax, genome)
 
-        filename = "chromosomes_with_SNPs__{}".format(panel_df.name)
+        filename = "chromosomes_with_SNPs__{}".format(panel.name)
         filepath = join(PLOTS_DIR, filename)
         plt.savefig(filepath, bbox_inches="tight")
 
@@ -80,24 +99,6 @@ class SnpDistances:
         return ax
 
 
-    def snp_distances_comparison_boxplot(self):
-        distances_long_format = self._generate_distances_long_format()
-
-        fig = plt.figure(figsize=(12, 3))
-        ax = fig.add_subplot(1, 1, 1)
-
-        panel_labels = distances_long_format["panel"].unique()
-        colors = [v for k, v in panel_colors().items() if k in panel_labels]
-
-        sns.boxplot(x="chromosome", y="value", hue="panel",
-                    data=distances_long_format, ax=ax,
-                    linewidth=0.6, showcaps=False,
-                    showfliers=False, palette=sns.color_palette(colors))
-
-        self._boxplot_aesthetics(ax)
-        plt.show()
-
-
     def _boxplot_aesthetics(self, ax):
         ax.set_title("Distancia media entre AIMs", y=1.08, fontweight="bold")
 
@@ -114,11 +115,10 @@ class SnpDistances:
 
 
     def _generate_distances_long_format(self):
-        panels = PanelCreator().read_AIMs_panels()
-        del(panels["GAL_Faltantes"])
         genome = create_genome_df()
-        frames = [PanelAnalyser().snp_distances_per_chromosome(panel, genome)
-                  for panel in panels.values()]
+        panel_analyser = PanelAnalyser()
+        frames = [panel_analyser.snp_distances_per_chromosome(panel, genome)
+                  for panel in Panel.all_panels()]
         distances = pd.concat(frames).T
 
         return pd.melt(distances)

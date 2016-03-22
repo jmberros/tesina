@@ -63,12 +63,13 @@ class Panel:
         Afterwards, you can just read the new subpanel with Panel(label).
         """
         new_label = '{}_SNPs_from_{}'.format(length, self.label)
-        sorted_snps = self.extra_info.sort_values(sort_key, ascending=False)
-        snps_with_available_genotypes = self.genotypes_1000G().columns
-        available_sorted_snps = sorted_snps.loc[snps_with_available_genotypes]
-        subpanel = available_sorted_snps.ix[:length, :]
+        rs_ids_with_genotypes = self.genotypes_1000G().columns
+        snps_with_genotype = self.extra_info.loc[rs_ids_with_genotypes]
+        snps_with_genotype.sort_values(sort_key, ascending=False, inplace=True)
+        subpanel = snps_with_genotype.ix[:length, :]
         filename = join(self.PANEL_INFO_DIR, new_label)
-        subpanel.to_csv(filename + ".csv", index_label=sorted_snps.index.name)
+        subpanel.to_csv(filename + ".csv",
+                        index_label=self.extra_info.index.name)
         np.savetxt(filename + ".snps", subpanel.index.values, fmt="%s")
 
         return filename

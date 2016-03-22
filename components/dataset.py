@@ -4,6 +4,7 @@ sys.path.insert(0, os.path.abspath("../helpers"))
 sys.path.insert(0, os.path.abspath("../sources"))
 
 
+from pandas import Series
 from collections import OrderedDict
 from sources.thousand_genomes import ThousandGenomes
 from helpers.general_helpers import load_yaml
@@ -40,6 +41,14 @@ class Dataset:
             return od[key]
 
         return od
+
+
+    @classmethod
+    def used_populations(cls):
+        pop_codes = []
+        for codes in cls.populations_per_dataset().values():
+            pop_codes.extend(codes)
+        return Series(pop_codes).unique()
 
 
     @classmethod

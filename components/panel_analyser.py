@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
+from .panel import Panel
 from pandas import DataFrame, Series
 from collections import defaultdict
 from matplotlib import cm
@@ -12,12 +13,12 @@ from helpers.general_helpers import thousands_separator, ratio_to_percentage
 class PanelAnalyser:
 
 
-    def compare_panel_lengths(self, panels_dic, reference_label="GAL_Completo"):
-        ref_count = len(panels_dic[reference_label])
+    def compare_panel_lengths(self, panels, reference_label="GAL_Completo"):
+        ref_count = len(Panel(reference_label).rs_ids)
 
         comparison = DataFrame({})
-        for label, panel in panels_dic.items():
-            s = Series({"AIMs count": len(panel)}, name=label)
+        for panel in panels:
+            s = Series({"AIMs count": len(panel.rs_ids)}, name=panel.label)
             comparison = comparison.append(s)
 
         comparison = comparison.applymap(int)
@@ -30,30 +31,30 @@ class PanelAnalyser:
         return comparison
 
 
-    def compare_AIMs_ancestry(self, panels_dic):
+    def compare_AIMs_ancestry(self, panels):
         frames = []
 
-        for label, panel in panels_dic.items():
+        for panel in panels:
             df = DataFrame({
-                "AIMs count": panel["population"].value_counts(),
+                "AIMs count": panel.extra_info["population"].value_counts(),
             })
 
-            df["Panel Percentage"] = df["AIMs count"] / len(panel)
+            df["Panel Percentage"] = df["AIMs count"] / len(panel.rs_ids)
             df["Panel Percentage"] = df["Panel Percentage"].map(ratio_to_percentage)
 
             frames.append(df)
 
-        return pd.concat(frames, axis=1, keys=panels_dic.keys())
+        return pd.concat(frames, axis=1, keys=[p.label for p in panels])
 
 
-    def compare_LSBL(self, panels_dic):
+    def compare_LSBL(self, panels):
         frames = []
-        for label, panel in panels_dic.items():
-            lsbl_sum = panel.groupby("population").sum().filter(regex="LSBL")
+        for panel in panels:
+            lsbl_sum = panel.extra_info.groupby("population").sum().filter(regex="LSBL")
             lsbl_sum_rounded = lsbl_sum.applymap(lambda x: round(x, 1))
             frames.append(lsbl_sum_rounded)
 
-        return pd.concat(frames, axis=1, keys=panels_dic.keys())
+        return pd.concat(frames, axis=1, keys=[p.label for p in panels])
 
 
     def snp_distances(self, galanter, present, genome):
@@ -126,11 +127,12 @@ class PanelAnalyser:
         positions = np.array(sorted(positions))
         chr_end = genome.loc[chromosome]["chr_length"]
 
-        if any(positions > chr_end):
-            illegal_positions = [n for n in positions if n > chr_end]
-            error_msg = "SNP positions {} greater than chromosome {} " + \
-                        "length".format(illegal_positions, chromosome)
-            raise Exception(error_msg)
+        #  if any(positions > chr_end):
+            #  illegal_positions = [n for n in positions if n > chr_end]
+            #  error_msg = "SNP positions {} greater than chromosome {} " + \
+                        #  "length".format(illegal_positions, chromosome)
+            #  # raise Exception(error_msg)
+            #  print(error_msg)
 
         # To compute the distances, we substract each SNP position to the next SNP
         # position. For the first SNP, we subsctract the position 0; for the last,
@@ -145,10 +147,10 @@ class PanelAnalyser:
         return positions_and_end - positions_and_start
 
 
-    def snp_distances_per_chromosome(self, panel_df, genome):
+    def snp_distances_per_chromosome(self, panel, genome):
         series_list = []
 
-        for chrom, df in panel_df.groupby("chr"):
+        for chrom, df in panel.snps.groupby("chr"):
             positions = df["position"]
             if len(positions) < 2:
                 s = Series([0])
@@ -162,7 +164,7 @@ class PanelAnalyser:
         df = DataFrame(series_list)
         df.index.name = "chromosome"
         df.reset_index(inplace=True)
-        df["panel"] = panel_df.name
+        df["panel"] = panel.label
         df.set_index(["panel", "chromosome"], inplace=True)
 
         return df
