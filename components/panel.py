@@ -64,9 +64,11 @@ class Panel:
         """
         new_label = '{}_SNPs_from_{}'.format(length, self.label)
         sorted_snps = self.extra_info.sort_values(sort_key, ascending=False)
-        subpanel = sorted_snps.ix[:length, :]
+        snps_with_available_genotypes = self.genotypes_1000G().columns
+        available_sorted_snps = sorted_snps.loc[snps_with_available_genotypes]
+        subpanel = available_sorted_snps.ix[:length, :]
         filename = join(self.PANEL_INFO_DIR, new_label)
-        subpanel.to_csv(filename + ".csv", sep='\t')
+        subpanel.to_csv(filename + ".csv", index_label=sorted_snps.index.name)
         np.savetxt(filename + ".snps", subpanel.index.values, fmt="%s")
 
         return filename

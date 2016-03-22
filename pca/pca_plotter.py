@@ -15,14 +15,14 @@ class PCAPlotter:
     PLOT_SIZE = (6, 5)
 
     def plot(self, components_df, explained_variance, title, filename,
-             components_to_compare=[("PC1", "PC2")]):
+             components_to_compare=[("PC1", "PC2")], plot_size=None):
 
         # Used to plot PCAs in the same "orientation" everytime
         reference_population = "PUR"
 
         # + 1 axes for the one with the legend, +1 because index starts at 1
         ax_ids = list(np.arange(1, len(components_to_compare) + 2))
-        nrows, ncols, figsize = self._fig_dimensions(len(ax_ids))
+        nrows, ncols, figsize = self._fig_dimensions(len(ax_ids), plot_size)
         fig = plt.figure(figsize=figsize)
 
         for component_pair in components_to_compare:
@@ -88,9 +88,10 @@ class PCAPlotter:
                      family="serif")
         plt.subplots_adjust(wspace=0.05)
 
-        makedirs(self.FIGS_DIR, exist_ok=True)
-        plt.savefig(join(self.FIGS_DIR, filename), facecolor="w",
-                    bbox_inches="tight")
+        if filename is not None:
+            makedirs(self.FIGS_DIR, exist_ok=True)
+            plt.savefig(join(self.FIGS_DIR, filename), facecolor="w",
+                        bbox_inches="tight")
 
 
     def _pca_plot_aesthetics(self, ax):
@@ -104,8 +105,11 @@ class PCAPlotter:
         return ax
 
 
-    def _fig_dimensions(self, number_of_plots):
+    def _fig_dimensions(self, number_of_plots, plot_size):
         plot_width, plot_height = self.PLOT_SIZE
+        if plot_size is not None:
+            plot_width, plot_height = plot_size
+
         plots_per_row = 3
 
         ncols = min([number_of_plots, plots_per_row])

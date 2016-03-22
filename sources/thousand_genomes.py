@@ -6,11 +6,10 @@ from os.path import isfile, expanduser, join
 
 
 class ThousandGenomes:
-    BASE_DIR = expanduser("~/tesina/1000Genomes_data/")
-    TRAW_DIR = join(BASE_DIR, "all_panels_bedfiles")
+    BASE_DIR = expanduser("~/tesina/1000Genomes/")
+    TRAW_DIR = join(BASE_DIR, "all_panels")
     POP_NAMES_FILE = join(BASE_DIR, "population_names.csv")
-    SAMPLES_FILENAME = join(BASE_DIR, "original-1000Genomes-files",
-                            "integrated_call_samples_v3.20130502.ALL.panel")
+    SAMPLES_FILENAME = join(BASE_DIR, "integrated_call_samples_v3.20130502.ALL.panel")
     POP_FREQS_TEMPLATE = join(BASE_DIR, "galanter_beds/{}.{}.frq.strat")
 
     def __init__(self):
