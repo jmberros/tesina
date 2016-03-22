@@ -12,9 +12,10 @@ from helpers.plot_helpers import legend_subplot, grey_spines
 
 class PCAPlotter:
     FIGS_DIR = expanduser("~/tesina/charts/PCAs")
+    PLOT_SIZE = (6, 5)
 
-    def plot(self, components_df, explained_variance, components_to_compare,
-             title, filename):
+    def plot(self, components_df, explained_variance, title, filename,
+             components_to_compare=[("PC1", "PC2")]):
 
         # Used to plot PCAs in the same "orientation" everytime
         reference_population = "PUR"
@@ -63,12 +64,12 @@ class PCAPlotter:
 
                 handles, labels = ax.get_legend_handles_labels()
 
-            ax.set_xlabel("{}{}: Explica {}%".format(xlabel_prefix,
+            ax.set_xlabel("{}{}: {}%".format(xlabel_prefix,
                 component_pair[0],
-                explained_variance.ix[component_pair[0]]))
-            ax.set_ylabel("{}{}: Explica {}%".format(ylabel_prefix,
+                explained_variance.ix[component_pair[0]]), fontsize=15)
+            ax.set_ylabel("{}{}: {}%".format(ylabel_prefix,
                 component_pair[1],
-                explained_variance.ix[component_pair[1]]))
+                explained_variance.ix[component_pair[1]]), fontsize=15)
 
             self._pca_plot_aesthetics(ax)
 
@@ -83,12 +84,13 @@ class PCAPlotter:
         ax = legend_subplot(ax, handles, legend_labels)
 
         #  plt.tight_layout()
-        fig.suptitle(title, fontsize=18, position=(0.12, 1.05), ha="left",
+        fig.suptitle(title, fontsize=18, position=(0.12, 1.1), ha="left",
                      family="serif")
-        plt.subplots_adjust(top=0.95, hspace=0.01, wspace=0.03)
+        plt.subplots_adjust(wspace=0.05)
 
         makedirs(self.FIGS_DIR, exist_ok=True)
-        plt.savefig(join(self.FIGS_DIR, filename), facecolor="w")
+        plt.savefig(join(self.FIGS_DIR, filename), facecolor="w",
+                    bbox_inches="tight")
 
 
     def _pca_plot_aesthetics(self, ax):
@@ -103,7 +105,7 @@ class PCAPlotter:
 
 
     def _fig_dimensions(self, number_of_plots):
-        plot_width, plot_height = 5, 5
+        plot_width, plot_height = self.PLOT_SIZE
         plots_per_row = 3
 
         ncols = min([number_of_plots, plots_per_row])

@@ -27,7 +27,7 @@ def remove_chartjunk(ax):
 
 
 def legend_subplot(ax, handles, labels):
-    ax.legend(handles, labels, fontsize=13, loc="upper left",
+    ax.legend(handles, labels, fontsize=15, loc="upper left",
               numpoints=2, scatterpoints=1)
 
     ax.set_axis_bgcolor("white")

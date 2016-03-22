@@ -77,7 +77,7 @@ class AdmixtureCVErrors:
 
         plt.tight_layout()
 
-        plt.savefig(join(PLOT_DIR, "cv_errors"), facecolor="w")
+        plt.savefig(join(PLOT_DIR, "cv_errors"), bbox_inches="tight")
 
         plt.show()
 

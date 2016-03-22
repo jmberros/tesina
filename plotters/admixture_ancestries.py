@@ -49,7 +49,7 @@ class AdmixtureAncestries:
         ax.legend_.set_visible(False)
 
         filepath = self._make_filepath(dataset_label, K, panel_label)
-        self._save_figure_to_disk(fig, filepath + "__samples")
+        self._save_figure_to_disk(fig, filepath + "__samples", bbox_inches="tight")
 
         show_plot and plt.show()
 

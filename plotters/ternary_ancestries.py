@@ -58,7 +58,8 @@ class TernaryAncestries:
 
                 self._ternary_plot_aesthetics(tax, plot_title, df_lite)
 
-            #  self._save_figure_to_disk(dataset_label, panel_group_label)
+            self._save_figure_to_disk(dataset_label, panel_group_label,
+                                      bbox_inches="tight")
             plt.show()
 
 
