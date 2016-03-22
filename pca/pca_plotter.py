@@ -1,23 +1,20 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-from math import sqrt, ceil
+from math import ceil
+from os import makedirs
 from os.path import join, expanduser
 from pandas import DataFrame
-from panels.thousand_genomes import ThousandGenomes
+from sources.thousand_genomes import ThousandGenomes
 from helpers import plot_helpers
 from helpers.plot_helpers import legend_subplot, grey_spines
 
 
-# Que acepte un "sufijo" para los filenames!
-# Que reciba un dataframe de componentes principales con MultiIndex por population
-# Y un objeto pca???
-# Y que plottee y guarde a disco los plots
 class PCAPlotter:
     FIGS_DIR = expanduser("~/tesina/charts/PCAs")
 
     def plot(self, components_df, explained_variance, components_to_compare,
-             title, suffix=""):
+             title, filename):
 
         # Used to plot PCAs in the same "orientation" everytime
         reference_population = "PUR"
@@ -78,20 +75,20 @@ class PCAPlotter:
 
         # Legend subplot. It will use the handles and labels of the last # plot.
         populations_df = ThousandGenomes.population_names()
-        pop_descriptions = [populations_df.loc[label]["Population Description"]
-                            for label in labels]
-        legend_labels = ["  -  ".join(pair) for pair
-                         in zip(labels, pop_descriptions)]
+        descriptions = populations_df.ix[labels, "Population Description"]
+        legend_labels = [" - ".join([code, desc])
+                         for code, desc in descriptions.iteritems()]
 
         ax = fig.add_subplot(nrows, ncols, ax_ids.pop(0))
         ax = legend_subplot(ax, handles, legend_labels)
 
         #  plt.tight_layout()
-        fig.suptitle(title, fontsize=20, position=(0.12, 1), ha="left")
-        plt.subplots_adjust(top=0.88)
+        fig.suptitle(title, fontsize=18, position=(0.12, 1.05), ha="left",
+                     family="serif")
+        plt.subplots_adjust(top=0.95, hspace=0.01, wspace=0.03)
 
-        #  filename += "__normalized"
-        #  plt.savefig(join(FIGS_DIR, filename), facecolor="w")
+        makedirs(self.FIGS_DIR, exist_ok=True)
+        plt.savefig(join(self.FIGS_DIR, filename), facecolor="w")
 
 
     def _pca_plot_aesthetics(self, ax):

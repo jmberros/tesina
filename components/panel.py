@@ -1,8 +1,14 @@
+# Path hack to import from sibling module
+import sys; import os
+sys.path.insert(0, os.path.abspath("../sources"))
+
+
 import pandas as pd
 
 from collections import OrderedDict
 from os.path import expanduser, join, basename
 from glob import glob
+from sources.thousand_genomes import ThousandGenomes
 
 
 class Panel:
@@ -23,18 +29,15 @@ class Panel:
 
     def genotypes_1000G(self, dataset=None):
         if self.genotypes_1000G_cache is None:
-            filename = join(self.DIR, "{}.traw.parsed".format(self.label))
-            df = pd.read_table(filename, index_col="SNP")
-            df.index.name = "rs_id"
-            df.columns.name = "sample"
-            self.genotypes_cache = df.transpose()
-
-            # FALTA EL MULTIINDEX CAPOOOOOOOOO
+            self.genotypes_cache = ThousandGenomes().read_traw(self.label)
 
         if dataset is None:
             return self.genotypes_cache
 
-        return self.genotypes_cache.loc[dataset.sample_ids]
+        # The three ":, :, :" are for a MultiIndex with levels:
+        # superpopulation, population, gender, sample
+        slicer = pd.IndexSlice[:, :, :, dataset.sample_ids]
+        return self.genotypes_cache.loc[slicer, :]
 
 
     def _generate_name(self):

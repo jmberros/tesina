@@ -7,19 +7,6 @@ class ThousandGenomesReader:
     BASE_DIR = expanduser("~/tesina/1000Genomes_data")
     VCF_GALANTER = expanduser("1000G_analysis/galanter_1000Genomes.vcf")
     GENOTYPES_FILE = "1000G_genotypes_dataframe.csv"
-    SAMPLES_FILENAME = join("original-1000Genomes-files",
-                            "integrated_call_samples_v3.20130502.ALL.panel")
-    POP_FREQS_TEMPLATES = {
-        "population": "galanter_beds/{}.populations.frq.strat",
-        "superpopulation": "galanter_beds/{}.superpopulations.frq.strat"
-    }
-
-
-    def read_samples(self):
-        samples = pd.read_table(join(self.BASE_DIR, self.SAMPLES_FILENAME))
-        rename = {'pop': 'population', 'super_pop': 'super_population'}
-        samples = samples.rename(columns=rename).dropna(axis=1, how='all')
-        return samples.set_index('sample')
 
 
     def read_genotypes(self):
@@ -27,21 +14,6 @@ class ThousandGenomesReader:
             self._parse_and_dump_data()
 
         return pd.read_csv(join(self.BASE_DIR, self.GENOTYPES_FILE), index_col=0)
-
-
-    def read_frequency_files(self):
-        mafs = {"population": {}, "superpopulation": {}}
-        panel_labels = ["GAL_Completo", "GAL_Affy"]  # Remove this
-
-        for panel_label in panel_labels:
-            for level in mafs:
-                fn = self.POP_FREQS_TEMPLATES[level].format(panel_label)
-                df = pd.read_csv(join(self.BASE_DIR, fn), engine="python", sep="\s*")
-                df = df.pivot_table(values="MAF", index="SNP", columns="CLST")
-                df = df.applymap(lambda freq: 1 - freq if freq > 0.5 else freq)
-                mafs[level][panel_label] = df
-
-        return mafs
 
 
     def _parse_and_dump_data(self):

@@ -1,15 +1,10 @@
-import matplotlib.pyplot as plt
-import numpy as np
-
 from math import sqrt
-from os.path import join, expanduser
 from pandas import DataFrame, Series
 from sklearn.decomposition import PCA
-from panels.thousand_genomes import ThousandGenomes
 
 
 class PCAGenerator:
-    def principal_components(self, genotypes, normalize=True):
+    def run(self, genotypes, normalize=True):
         """
         Receive a genotypes DataFrame which index should at least have "sample"
         IDs (e.g. HG00096 ...) and ideally would also be a MultiIndex with

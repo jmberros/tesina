@@ -1,12 +1,12 @@
 # Path hack to import from sibling module
 import sys; import os
 sys.path.insert(0, os.path.abspath("../helpers"))
-sys.path.insert(0, os.path.abspath("../panels"))
+sys.path.insert(0, os.path.abspath("../sources"))
 
 
 from collections import OrderedDict
+from sources.thousand_genomes import ThousandGenomes
 from helpers.general_helpers import load_yaml
-from panels.thousand_genomes import ThousandGenomes
 
 
 class Dataset:
