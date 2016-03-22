@@ -57,13 +57,8 @@ class Panel:
         bim_files = [basename(path) for path in glob(join(cls.DIR, "*.bim"))]
         labels = sorted([fn.replace(".bim", "") for fn in bim_files])
 
-        return [cls(label) for label in labels]
+        gal_panels = [cls(label) for l in labels if "GAL" in label]
+        control_panels = [cls(label) for l in labels if "CPx" in label]
 
-
-    #  @classmethod
-    #  def sorted_panels(cls):
-        #  panels = OrderedDict()
-        #  for label in sorted(labels):
-            #  panels[label] = cls(label)
-        #  pass
+        return gal_panels + control_panels
 
