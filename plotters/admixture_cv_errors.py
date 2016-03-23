@@ -1,11 +1,13 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import seaborn as sns
 
 from os.path import join
 from itertools import product
-from datasets.dataset_creator import DatasetCreator
-from helpers.plot_helpers import panel_colors, remove_chartjunk, legend_subplot
+from components.dataset import Dataset
+from components.panel import Panel
+from helpers.plot_helpers import remove_chartjunk, legend_subplot
 
 
 CV_ERRORS_FILE = "~/tesina/admixture/CV_error_summary.clean"
@@ -25,59 +27,60 @@ class AdmixtureCVErrors:
         return df
 
 
-    def extract_panel_name(self, txt):
-        return "_".join(txt.split("_")[1:]).replace("cpx", "")
-
-
-    def plot(self):
+    def plot(self, filename, cv_errors=None):
         cols, rows = (2, 3)
-        plot_width, plot_height = (5, 3)
+        plot_width, plot_height = (7, 4)
 
         fig = plt.figure(figsize=(plot_width * cols, plot_height * rows))
         ax_ids = list(np.arange(cols * rows) + 1)
         ax_ids.reverse()
 
-        cv_errors = self.read_cv_errors()
-        dataset_names = DatasetCreator().dataset_names()
+        if cv_errors is None:
+            cv_errors = self.read_cv_errors()
 
-        for dataset in cv_errors.index.get_level_values("dataset").unique():
+        ymin, ymax = cv_errors.describe().loc[["min", "max"], "CV_error"]
+
+        dataset_labels = cv_errors.index.get_level_values("dataset").unique()
+        for dataset_label in dataset_labels:
+            dataset = Dataset(dataset_label)
 
             ax = fig.add_subplot(rows, cols, ax_ids.pop())
             lines = []
 
-            panel_labels = cv_errors.loc[dataset].index\
+            panel_labels = cv_errors.loc[dataset.label].index\
                 .get_level_values("panel").unique()
 
+            palette = sns.color_palette("Dark2", len(panel_labels))
             for panel in panel_labels:
-                data = cv_errors.loc[(dataset, panel)]
-                data.plot(ax=ax, marker=".", color=panel_colors(panel), zorder=1)
-                remove_chartjunk(ax)
+                data = cv_errors.loc[(dataset.label, panel)]
+                data.plot(ax=ax, marker="", color=palette.pop(0), zorder=1,
+                          linestyle="solid", lw=2)
 
                 # Minimum error mark
                 x_min = data["CV_error"].idxmin()
                 y_min = data["CV_error"].min()
-                min_marker = ax.scatter(x_min, y_min, marker="v",
-                                        edgecolor="Black",
-                                        color="Orange", zorder=2, s=35)
+                min_marker = ax.scatter(x_min, y_min, marker="v", zorder=2,
+                                        edgecolor="black", color="yellow",
+                                        lw=1.5, s=85)
 
+            sns.despine(ax=ax, top=True, right=True, left=True, offset=1)
             lines, labels = ax.get_legend_handles_labels()
-            ax.set_title("Dataset: " + dataset_names[dataset], fontsize=12,
-                         y=1.1)
-            ax.set_ylabel("CV Error", fontsize=11)
-            ax.set_xlabel("K", fontsize=11)
+            names = [Panel(label).name for label in panel_labels]
+            title = "{}".format(dataset.name)
+            ax.set_title(title, fontsize=16, y=1.1, family="serif")
+            ax.set_ylabel("CV Error", fontsize=16)
             ax.legend_.remove()
+            ax.xaxis.grid(linestyle="dotted", color="grey")
+            ax.set_ylim([ymin * 0.99, ymax * 1.01])  # Keep the same limits across axes
 
         # Ugly hack to get the legend in a separate subplot slot
         ax = plt.subplot(rows, cols, ax_ids.pop())
 
-
         legend_lines = lines + [min_marker]
-        legend_labels = list(panel_labels) + ["Valor mínimo de error"]
+        legend_labels = names + ["Valor mínimo de error"]
         legend_subplot(ax, legend_lines, legend_labels)
 
         plt.tight_layout()
+        plt.savefig(join(PLOT_DIR, filename), bbox_inches="tight")
 
-        plt.savefig(join(PLOT_DIR, "cv_errors"), bbox_inches="tight")
-
-        plt.show()
-
+        return ax

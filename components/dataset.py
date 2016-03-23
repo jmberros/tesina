@@ -16,6 +16,7 @@ class Dataset:
         self.name = self.make_name(label)
         self._thousand_genomes = ThousandGenomes()
         self.pop_codes = self.populations_per_dataset(label)
+        self.continents = list(self.label)  # Depends on the naming convention
         self.sample_ids = self._thousand_genomes.samples_from_pop_codes(self.pop_codes).index
 
 
