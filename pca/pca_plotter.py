@@ -16,9 +16,8 @@ class PCAPlotter:
     PLOT_SIZE = (6, 5)
 
 
-    def draw_ax(self, ax, components_to_compare, components_df, explained_variance):
-        # Used to plot PCAs in the same "orientation" everytime
-        reference_population = "PUR"
+    def draw_ax(self, ax, components_to_compare, components_df,
+                explained_variance, reference_population, title):
 
         ylabel_prefix = ""
         xlabel_prefix = ""
@@ -55,10 +54,11 @@ class PCAPlotter:
 
         ax.set_xlabel("{}{}: {}%".format(xlabel_prefix,
             components_to_compare[0],
-            explained_variance.ix[components_to_compare[0]]), fontsize=15)
+            explained_variance.ix[components_to_compare[0]]))
         ax.set_ylabel("{}{}: {}%".format(ylabel_prefix,
             components_to_compare[1],
-            explained_variance.ix[components_to_compare[1]]), fontsize=15)
+            explained_variance.ix[components_to_compare[1]]))
+        ax.set_title(title)
         self._pca_plot_aesthetics(ax)
 
         return ax
@@ -101,10 +101,8 @@ class PCAPlotter:
 
     def _pca_plot_aesthetics(self, ax):
         plot_helpers.hide_spines_and_ticks(ax, spines="all")
-        ax.set_axis_bgcolor("white")
         ax.tick_params(axis="x", bottom="off", top="off", labelbottom="off")
         ax.tick_params(axis="y", left="off", right="off", labelleft="off")
-        ax.grid(False)
         grey_spines(ax)
 
         return ax
