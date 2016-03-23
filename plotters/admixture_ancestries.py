@@ -1,10 +1,8 @@
-import gc
 import seaborn as sns
-import matplotlib as mpl
 import matplotlib.pyplot as plt
 
 from os import makedirs
-from os.path import join, isdir, expanduser
+from os.path import join, expanduser
 from math import ceil
 from components.panel import Panel
 from components.dataset import Dataset
@@ -13,9 +11,9 @@ from helpers.plot_helpers import (hide_spines_and_ticks, population_colors,
                                   ancestral_components_order)
 
 
-PLOTS_DIR = expanduser("~/tesina/charts/ADMIXTURE/")
-
 class AdmixtureAncestries:
+    PER_SAMPLE_FIGSIZE = 18, 2.75
+    PLOTS_DIR = expanduser("~/tesina/charts/ADMIXTURE/")
 
     def plot_per_sample(self, dataset_label, K, panel_label,
                         ancestries_df, show_plot=True, sort=True):
@@ -27,13 +25,12 @@ class AdmixtureAncestries:
             df_lite = df_lite.sort_values(["population", "AMR"], ascending=False)
 
         df_lite.set_index("population", inplace=True)
-
         df_lite = self._reorder_populations_and_components(df_lite, K)
         sample_count = len(df_lite)
 
         # Plot that baby
         plot_title = self._make_title(dataset_label, K, panel_label)
-        fig = plt.figure(figsize=(15, 1.75))
+        fig = plt.figure(figsize=self.PER_SAMPLE_FIGSIZE)
         ax = fig.add_subplot(1, 1, 1)
         colors = self._generate_palette(df_lite.columns)
         df_lite.plot(ax=ax, kind="bar", stacked=True, linewidth=0, width=1,
@@ -53,7 +50,8 @@ class AdmixtureAncestries:
         filepath = self._make_filepath(dataset_label, K, panel_label)
         plt.savefig(filepath + "__samples", bbox_inches="tight")
 
-        show_plot and plt.show()
+        if show_plot:
+            plt.show()
 
         fig.clf()
 
@@ -71,7 +69,7 @@ class AdmixtureAncestries:
 
         # Plot that baby
         plot_title = self._make_title(dataset_label, K, panel_label)
-        fig = plt.figure(figsize=(1*pop_count, 3.5))
+        fig = plt.figure(figsize=(1.5*pop_count, 5))
         ax = fig.add_subplot(1, 1, 1)
         mean_ancestries.plot(ax=ax, kind="bar", stacked=True,
                              color=self._generate_palette(mean_ancestries.columns))
@@ -92,7 +90,7 @@ class AdmixtureAncestries:
             print(mean_ancestries.applymap(self._round_ratio))
             plt.show()
 
-        fig.clf()
+        fig.clf()  # Prevents memory leak when plotting in a loop
 
 
     def plot_all(self, ancestries_df=None):
@@ -103,15 +101,6 @@ class AdmixtureAncestries:
             self.plot_population_means(*multi_index, ancestries_df,
                                        show_plot=False)
             self.plot_per_sample(*multi_index, ancestries_df, show_plot=False)
-
-
-    def print_free_mem(self):
-        with open("/proc/meminfo") as mem:
-            meminfo = mem.read()
-
-        print("Free MEM:",
-            round(int(meminfo.split("\n")[2].split()[1]) // 1024 / 1024, 2),
-            "Gb")
 
 
     def _reorder_populations_and_components(self, df, K):
@@ -138,11 +127,10 @@ class AdmixtureAncestries:
 
 
     def _plot_aesthetics(self, ax, plot_title):
-        ax.set_title(plot_title, y=1.05, fontsize=14, fontweight="bold",
-                     family="serif")
+        ax.set_title(plot_title, y=1.05, family="serif")
         ax.set_xlabel("")
         ax.set_xticklabels(ax.get_xticklabels(), rotation=0)
-        ax.set_ylabel("Ancestrías", fontsize=12)
+        ax.set_ylabel("Ancestrías")
         ax.set_yticklabels([])  # No need to state ratios exactly
         #  hide_spines_and_ticks(ax)
 
@@ -151,8 +139,6 @@ class AdmixtureAncestries:
         ax.set_ylim([0, 1.5])  # Leave room for legend above axes
         ax.legend(loc="upper center", ncol=ceil(K/2))
         ax.legend_.set_title("Componentes inferidos")
-        ax.legend_.get_title().set_fontsize(11)
-        [text.set_fontsize(11) for text in ax.legend_.get_texts()]
 
 
     def _save_latex_table_to_disk(self, df, filepath):
@@ -168,7 +154,7 @@ class AdmixtureAncestries:
 
     def _make_filepath(self, dataset_label, K, panel_label):
         filename = "{}__{}__{}".format(dataset_label, panel_label, K)
-        subdir = join(PLOTS_DIR, "{}__{}".format(panel_label, dataset_label))
+        subdir = join(self.PLOTS_DIR, "{}__{}".format(panel_label, dataset_label))
         makedirs(subdir, exist_ok=True)
         return join(subdir, filename)
 

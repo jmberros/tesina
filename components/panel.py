@@ -89,15 +89,41 @@ class Panel:
 
 
     @classmethod
-    def all_panels(cls):
+    def panel_groups(cls):
+        return {
+            "panels": cls.all_panels(),
+            "control_panels": cls.all_control_panels(),
+            "subpanels": cls.all_subpanels()
+        }
+
+
+    @classmethod
+    def all_panels_and_subpanels(cls):
         glob_expr = join(cls.THOUSAND_GENOMES_DIR, "*.bim")
         bim_files = [basename(path) for path in glob(glob_expr)]
         labels = sorted([fn.replace(".bim", "") for fn in bim_files])
 
-        gal_panels = [cls(label) for label in labels if "GAL" in label]
-        gal_panels[0], gal_panels[1] = gal_panels[:2][::-1]
-        # ^ Gets GAL_Completo in front
-        control_panels = [cls(label) for label in labels if "CPx" in label]
+        gal_panels = [label for label in labels if "GAL" in label]
+        control_panels = [label for label in labels if "CPx" in label]
+        subpanels = [label for label in labels if "_from_" in label
+                     and not label in gal_panels + control_panels]
 
-        return gal_panels + control_panels
+        return [cls(label) for label in gal_panels + control_panels + subpanels]
 
+
+    @classmethod
+    def all_panels(cls):
+        return [panel for panel in cls.all_panels_and_subpanels()
+                if "GAL" in panel.label and "_from_" not in panel.label]
+
+
+    @classmethod
+    def all_subpanels(cls):
+        return [panel for panel in cls.all_panels_and_subpanels()
+                if "_from_" in panel.label]
+
+
+    @classmethod
+    def all_control_panels(cls):
+        return [panel for panel in cls.all_panels_and_subpanels()
+                if "CPx" in panel.label and "_from_" not in panel.label]

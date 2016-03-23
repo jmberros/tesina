@@ -19,7 +19,7 @@ class AdmixtureResults:
 
         datasets = Dataset.all_datasets()
         Ks = self.available_Ks()
-        panels = Panel.all_panels()
+        panels = Panel.all_panels() + Panel.all_control_panels()
 
         for dataset, K, panel in product(datasets, Ks, panels):
 
