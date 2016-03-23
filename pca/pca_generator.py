@@ -46,4 +46,3 @@ class PCAGenerator:
         else:
             return (series - mu) / sqrt(p * q)
 
-
