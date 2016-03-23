@@ -1,13 +1,13 @@
 import pandas as pd
 
 from os import popen
-from os.path import join, expanduser
+from os.path import join, expanduser, isdir
 from itertools import product
 from pandas import DataFrame
 from collections import defaultdict, OrderedDict
-from panels.panel_creator import PanelCreator
-from panels.thousand_genomes import ThousandGenomes
-from datasets.dataset_creator import DatasetCreator
+from sources.thousand_genomes import ThousandGenomes
+from components.dataset import Dataset
+from components.panel import Panel
 
 
 ADMIXTURE_DIR = expanduser("~/tesina/admixture")
@@ -17,34 +17,35 @@ class AdmixtureResults:
     def read_ancestry_files(self, only_optimal_Ks=False):
         dataframes = []
 
-        datasets = DatasetCreator().definitions("datasets")
+        datasets = Dataset.all_datasets()
         Ks = self.available_Ks()
-        panels = self._all_panels_labels()
+        panels = Panel.all_panels()
 
-        for dataset_label, K, panel_label in product(datasets, Ks, panels):
+        for dataset, K, panel in product(datasets, Ks, panels):
 
-            if only_optimal_Ks and self.optimal_Ks()[dataset_label] != K:
+            if only_optimal_Ks and self.optimal_Ks()[dataset.label] != K:
                 continue
 
-            fdir = "~/tesina/admixture/{}_{}/".format(dataset_label,
-                                                        panel_label)
-            fname = "{}_{}.{}.Q".format(dataset_label, panel_label, K)
+            # Results are sorted in directories named like DATASET_PANEL
+            tag = "{}_{}".format(dataset.label, panel.label)
+            basedir = join(ADMIXTURE_DIR, tag)
 
-            ancestries_df = pd.read_csv(join(fdir, fname), sep="\s+",
-                                            names=list(range(K)))
+            if not isdir(basedir):
+                continue
 
-            # Assign sample IDs
-            # ADMIXTURE ran with the .bed file that had this .fam,
-            # so the order of samples in the results file .Q
-            # will be the one found there:
-            fname = "{}_{}.fam".format(dataset_label, panel_label)
-            samples = pd.read_csv(join(fdir, fname), sep="\s+",
-                                    index_col=0, usecols=[0],
-                                    names=["sample"])
+            # Read the .Q file for ratios of ancestry per sample
+            fname = "{}.{}.Q".format(tag, K)
+            ancestries_df = pd.read_csv(join(basedir, fname), sep="\s+",
+                                        names=list(range(K)))
+
+            # Read the .fam file for the sample IDs (they're in the same order)
+            fname = "{}.fam".format(tag)
+            samples = pd.read_csv(join(basedir, fname), sep="\s+", index_col=0,
+                                  usecols=[0], names=["sample"])
             ancestries_df.index = samples.index
 
             # Add population data to the sample IDs
-            samples_df = ThousandGenomes().read_samples_data()
+            samples_df = ThousandGenomes().all_samples
             ancestries_df = samples_df.join(ancestries_df).dropna()
 
             continents_present = len(ancestries_df["super_population"].unique())
@@ -55,9 +56,9 @@ class AdmixtureResults:
 
             # Arrange the hierarchical index
             ancestries_df.reset_index(inplace=True)
-            ancestries_df["dataset"] = dataset_label
+            ancestries_df["dataset"] = dataset.label
             ancestries_df["K"] = K
-            ancestries_df["panel"] = panel_label
+            ancestries_df["panel"] = panel.label
             ancestries_df.set_index(["dataset", "K", "panel"], inplace=True)
 
             dataframes.append(ancestries_df)
@@ -124,11 +125,4 @@ class AdmixtureResults:
     def available_Ks(self):
         command = "ls -R {} | grep '.*.Q' | ruby -F'\.' -lane 'puts $F[-2]' | sort | uniq".format(ADMIXTURE_DIR)
         return [int(k) for k in popen(command).read().rstrip().split("\n")]
-
-
-    def _all_panels_labels(self):
-        panel_creator = PanelCreator()
-        panel_labels = panel_creator.panel_labels()
-        control_labels = panel_creator.control_labels()
-        return panel_labels + control_labels
 

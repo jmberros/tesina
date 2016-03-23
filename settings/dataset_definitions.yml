@@ -16,10 +16,10 @@ names:
 
 populations_per_group:
     L:
-    - PUR
-    - CLM
-    - MXL
     - PEL
+    - MXL
+    - CLM
+    - PUR
     E:
     - IBS
     - GBR

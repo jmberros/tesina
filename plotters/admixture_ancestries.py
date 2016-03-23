@@ -6,8 +6,8 @@ import matplotlib.pyplot as plt
 from os import makedirs
 from os.path import join, isdir, expanduser
 from math import ceil
-from panels.panel_creator import PanelCreator
-from datasets.dataset_creator import DatasetCreator
+from components.panel import Panel
+from components.dataset import Dataset
 from admixture.results import AdmixtureResults
 from helpers.plot_helpers import (hide_spines_and_ticks, population_colors,
                                   ancestral_components_order)
@@ -23,7 +23,8 @@ class AdmixtureAncestries:
         df_lite = ancestries_df.loc[dataset_label, K, panel_label].dropna(axis=1)
 
         if sort and "AMR" in df_lite.columns:
-            df_lite = df_lite.reset_index().sort_values(["population", "AMR"])
+            df_lite = df_lite.reset_index()
+            df_lite = df_lite.sort_values(["population", "AMR"], ascending=False)
 
         df_lite.set_index("population", inplace=True)
 
@@ -32,24 +33,25 @@ class AdmixtureAncestries:
 
         # Plot that baby
         plot_title = self._make_title(dataset_label, K, panel_label)
-        fig = plt.figure(figsize=(10, 3))
+        fig = plt.figure(figsize=(15, 1.75))
         ax = fig.add_subplot(1, 1, 1)
         colors = self._generate_palette(df_lite.columns)
         df_lite.plot(ax=ax, kind="bar", stacked=True, linewidth=0, width=1,
                      color=colors)
 
-        # Define the positions of the population labels
+        # Place the population labels in the middle of the range of its samples
         population_order = df_lite.index.unique()
         N_by_population = df_lite.index.value_counts()[population_order]
         xlabels = N_by_population.cumsum() - N_by_population / 2
         ax.set_xticklabels(xlabels.index)
         ax.set_xticks(xlabels.values)
 
+        ax.set_ylim([0, 1])
         self._plot_aesthetics(ax, plot_title)
         ax.legend_.set_visible(False)
 
         filepath = self._make_filepath(dataset_label, K, panel_label)
-        self._save_figure_to_disk(fig, filepath + "__samples", bbox_inches="tight")
+        plt.savefig(filepath + "__samples", bbox_inches="tight")
 
         show_plot and plt.show()
 
@@ -69,16 +71,17 @@ class AdmixtureAncestries:
 
         # Plot that baby
         plot_title = self._make_title(dataset_label, K, panel_label)
-        fig = plt.figure(figsize=(1*pop_count, 4))
+        fig = plt.figure(figsize=(1*pop_count, 3.5))
         ax = fig.add_subplot(1, 1, 1)
         mean_ancestries.plot(ax=ax, kind="bar", stacked=True,
                              color=self._generate_palette(mean_ancestries.columns))
 
         self._plot_aesthetics(ax, plot_title)
+        sns.despine(top=True, left=True, right=True)
         self._legend_aesthetics(ax, K)
 
         filepath = self._make_filepath(dataset_label, K, panel_label)
-        self._save_figure_to_disk(fig, filepath + "__means")
+        plt.savefig(filepath + "__means", bbox_inches="tight")
 
         # Round ratios for a human readable presentation in tables
         mean_ancestries = mean_ancestries.applymap(self._round_ratio)
@@ -113,8 +116,7 @@ class AdmixtureAncestries:
 
     def _reorder_populations_and_components(self, df, K):
         # Assuming poulations as indices and components as columns
-        populations_order = DatasetCreator().populations_plot_order()
-        df = df.loc[populations_order].dropna()
+        df = df.loc[Dataset.used_populations()].dropna()
 
         components_order = df.columns.intersection(ancestral_components_order(K))
         df = df[components_order]
@@ -136,12 +138,13 @@ class AdmixtureAncestries:
 
 
     def _plot_aesthetics(self, ax, plot_title):
-        ax.set_title(plot_title, y=1.05, fontsize=14, fontweight="bold")
+        ax.set_title(plot_title, y=1.05, fontsize=14, fontweight="bold",
+                     family="serif")
         ax.set_xlabel("")
         ax.set_xticklabels(ax.get_xticklabels(), rotation=0)
         ax.set_ylabel("Ancestrías", fontsize=12)
         ax.set_yticklabels([])  # No need to state ratios exactly
-        hide_spines_and_ticks(ax)
+        #  hide_spines_and_ticks(ax)
 
 
     def _legend_aesthetics(self, ax, K):
@@ -152,21 +155,15 @@ class AdmixtureAncestries:
         [text.set_fontsize(11) for text in ax.legend_.get_texts()]
 
 
-    def _save_figure_to_disk(self, fig, filepath):
-        plt.tight_layout()  # Without this it would get cropped
-        fig.savefig(filepath, facecolor="white")
-
-
     def _save_latex_table_to_disk(self, df, filepath):
         with open(filepath + ".latex-table", "w") as fp:
             fp.write(df.to_latex())
 
 
-    def _make_title(self, dataset, K, panel):
-        names = {**PanelCreator().all_panel_names(),
-                 **DatasetCreator().dataset_names()}
-
-        return "{} - {} (K = {})".format(names[dataset], names[panel], K)
+    def _make_title(self, dataset_label, K, panel_label):
+        dataset_name = Dataset(dataset_label).name
+        panel_name = Panel(panel_label).name
+        return "{} - {} (K = {})".format(dataset_name, panel_name, K)
 
 
     def _make_filepath(self, dataset_label, K, panel_label):
