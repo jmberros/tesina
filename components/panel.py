@@ -118,9 +118,11 @@ class Panel:
 
 
     @classmethod
-    def all_subpanels(cls):
-        subpanels = [panel for panel in cls.all_panels_and_subpanels()
-               if "_from_" in panel.label]
+    def all_subpanels(cls, label=None):
+        all_panels = cls.all_panels_and_subpanels()
+        subpanels = [p for p in all_panels if "_from_" in p.label]
+        if label is not None:
+            subpanels = [sp for sp in subpanels if label in sp.label]
         subpanels.sort(key=lambda p: len(p.rs_ids), reverse=True)
         return subpanels
 
