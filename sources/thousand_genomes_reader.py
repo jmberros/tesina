@@ -38,13 +38,6 @@ class ThousandGenomesReader:
         df_SNPs.to_csv(KG_SNPS_DUMPFILE)
 
 
-    def _get_pop_names_from_url():
-        url = "http://www.1000genomes.org/category/" + \
-              "frequently-asked-questions/population"
-
-        return pd.read_html(url)[0]  # First table in the page:
-
-
     def _remove_unkown_snp_subtypes(self, df):
         return df[df.var_subtype != 'unknown']
 

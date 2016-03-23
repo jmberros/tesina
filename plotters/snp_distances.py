@@ -9,7 +9,7 @@ from collections import OrderedDict
 
 from components.panel import Panel
 from components.panel_analyser import PanelAnalyser
-from panels.genome import create_genome_df
+from components.genome import Genome
 from helpers.plot_helpers import panel_colors, hide_spines_and_ticks
 
 
@@ -40,7 +40,7 @@ class SnpDistances:
 
 
     def chromosomes_with_SNPs_plot(self, panel):
-        genome = create_genome_df()
+        genome = Genome.regions()
         fig, ax = plt.subplots()
         chrom_linewidth = 0.75
         chrom_color = "Grey"

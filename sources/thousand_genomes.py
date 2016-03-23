@@ -12,9 +12,6 @@ class ThousandGenomes:
     SAMPLES_FILENAME = join(BASE_DIR, "integrated_call_samples_v3.20130502.ALL.panel")
     POP_FREQS_TEMPLATE = join(BASE_DIR, "galanter_beds/{}.{}.frq.strat")
 
-    def __init__(self):
-        self.all_samples = self.read_samples()
-
 
     def read_traw(self, label):
         filename = join(self.TRAW_DIR, "{}.traw.parsed".format(label))
@@ -29,13 +26,13 @@ class ThousandGenomes:
 
     def samples_from_pop_codes(self, pop_codes):
         # Assumes pop_code as a column.
-        missing = setdiff1d(pop_codes, self.all_samples["population"])
+        missing = setdiff1d(pop_codes, self.all_samples()["population"])
         if len(missing) > 0:
             raise ValueError("Couldn't find populations: {}".format(missing))
 
         # Turn population into index temporarily to get the desired samples
         # *in the order of the pop_codes*. Then set the original index back.
-        filtered = self.all_samples.reset_index().set_index("population").loc[pop_codes]
+        filtered = self.all_samples().reset_index().set_index("population").loc[pop_codes]
         return filtered.reset_index().set_index("sample").dropna()
 
 
@@ -54,17 +51,31 @@ class ThousandGenomes:
     @classmethod
     def population_names(cls):
         if isfile(cls.POP_NAMES_FILE):
-            return pd.read_csv(cls.POP_NAMES_FILE, index_col='Population Code')
+            return pd.read_csv(cls.POP_NAMES_FILE, index_col="population")
 
-        df = _get_pop_names_from_url().set_index("Population Code")
-        df = df[["Population Description", "Super Population Code"]]
+        df = cls._get_pop_names_from_url()
+        keep_these_columns = ["Population Code", "Population Description",
+                              "Super Population Code"]
+        df = df[keep_these_columns]
+        df.columns = ["population", "description", "superpopulation"]
+        df.set_index("population", inplace=True)
+
         df.to_csv(cls.POP_NAMES_FILE)
         return df
+
+
+    @staticmethod
+    def _get_pop_names_from_url():
+        url = "http://www.1000genomes.org/category/" + \
+              "frequently-asked-questions/population"
+
+        return pd.read_html(url)[0]  # First table in the page:
+
 
     # --- Helper internal methods ---
 
     @classmethod
-    def read_samples(cls):
+    def all_samples(cls):
         samples = pd.read_table(join(cls.BASE_DIR, cls.SAMPLES_FILENAME))
         rename = {'pop': 'population', 'super_pop': 'super_population'}
         samples = samples.rename(columns=rename).dropna(axis=1, how='all')

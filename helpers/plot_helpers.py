@@ -1,7 +1,6 @@
 import numpy as np
 
 from .general_helpers import load_yaml
-#  from datasets.dataset_creator import DatasetCreator
 
 
 def remove_chartjunk(ax):
@@ -74,18 +73,6 @@ def panel_colors(key=None):
         return d[key]
     else:
         return d
-
-
-#  def populations_plot_order():
-    #  dc = DatasetCreator()
-    #  pop_groups = dc.definitions("plot_order")
-    #  populations_per_group = dc.definitions("populations_per_group")
-
-    #  populations = []
-    #  for pop_group in pop_groups:
-        #  populations.extend(populations_per_group[pop_group])
-
-    #  return populations
 
 
 def grey_spines(ax):
