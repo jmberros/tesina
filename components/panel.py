@@ -6,15 +6,22 @@ sys.path.insert(0, os.path.abspath("../sources"))
 import numpy as np
 import pandas as pd
 
+from pandas import Series
 from collections import OrderedDict
 from os.path import expanduser, join, basename, isfile
 from glob import glob
+
 from sources.thousand_genomes import ThousandGenomes
+from sources.max_plank import MaxPlank
 
 
 class Panel:
     THOUSAND_GENOMES_DIR = expanduser("~/tesina/1000Genomes/all_panels")
     PANEL_INFO_DIR = expanduser("~/tesina/panel_info_files")
+    SOURCES = {
+        "1000G": ThousandGenomes,
+        "MaxPlank": MaxPlank,
+    }
 
     def __init__(self, label):
         """
@@ -22,7 +29,6 @@ class Panel:
         <label>.csv info file about the SNPs in the panel.
         """
         self.label = label
-
         bim_file = join(self.THOUSAND_GENOMES_DIR, label + ".bim")
         self.snps = self.read_bim(bim_file)
         self.rs_ids = self.snps.index.values  # Redundant, but handy shortcut
@@ -32,24 +38,35 @@ class Panel:
         if isfile(info_file):
             self.extra_info = self.read_info(info_file)
 
-        self.genotypes_1000G_cache = None
+        self.genotypes_cache = {}
 
 
     def __repr__(self):
         return '<"{}" with {} SNPs>'.format(self.label, len(self.rs_ids))
 
 
-    def genotypes_1000G(self, dataset=None):
-        if self.genotypes_1000G_cache is None:
-            self.genotypes_cache = ThousandGenomes().read_traw(self.label)
+    def genotypes(self, source_label, dataset=None):
+        if self.genotypes_cache.get(source_label) is None:
+            source_class = self.SOURCES[source_label]
+            self.genotypes_cache[source_label] = \
+                source_class.read_panel_traw(self.label)
 
         if dataset is None:
-            return self.genotypes_cache
+            return self.genotypes_cache[source_label]
 
         # The three ":, :, :" are for a MultiIndex with levels:
         # superpopulation, population, gender, sample
         slicer = pd.IndexSlice[:, :, :, dataset.sample_ids]
-        return self.genotypes_cache.loc[slicer, :]
+        return self.genotypes_cache[source_label].loc[slicer, :]
+
+
+    def write_snps_file(self, dest_dir):
+        """
+        Will write a ".snps" file of one rs ID per line, in the dest_dir.
+        """
+        filename = join(dest_dir, "{}.snps".format(self.label))
+        Series(self.rs_ids).to_csv(filename, index=False)
+        return filename
 
 
     def _generate_name(self):

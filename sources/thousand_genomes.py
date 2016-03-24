@@ -1,27 +1,20 @@
-import vcf
+# Path hack to import from sibling module
+import sys; import os
+sys.path.insert(0, os.path.abspath("../components"))
+
+
 import pandas as pd
 
 from numpy import setdiff1d
 from os.path import isfile, expanduser, join
+from components.source import Source
 
 
-class ThousandGenomes:
-    BASE_DIR = expanduser("~/tesina/1000Genomes/")
-    TRAW_DIR = join(BASE_DIR, "all_panels")
+class ThousandGenomes(Source):
+    BASE_DIR = expanduser("~/tesina/1000Genomes/all_panels")
     POP_NAMES_FILE = join(BASE_DIR, "population_names.csv")
     SAMPLES_FILENAME = join(BASE_DIR, "integrated_call_samples_v3.20130502.ALL.panel")
     POP_FREQS_TEMPLATE = join(BASE_DIR, "galanter_beds/{}.{}.frq.strat")
-
-
-    def read_traw(self, label):
-        filename = join(self.TRAW_DIR, "{}.traw.parsed".format(label))
-        df = pd.read_table(filename, index_col="SNP").transpose()
-        df.index.name, df.columns.name = "sample", "rs_id"
-        samples = self._filter_by_sample_ids(self.all_samples, df.index)
-        multi_index = ["superpopulation", "population", "gender", "sample"]
-        df = samples.join(df).reset_index().set_index(multi_index)
-
-        return df.sort_index()
 
 
     def samples_from_pop_codes(self, pop_codes):
@@ -39,7 +32,7 @@ class ThousandGenomes:
     @classmethod
     def mafs(cls):
         d = {"population": {}, "superpopulation": {}}
-        panel_labels = ["GAL_Completo", "GAL_Affy"]  # Remove this
+        panel_labels = ["GAL_Completo", "GAL_Affy"]  # TODO: Remove this
         for panel_label in panel_labels:
             for level in d.keys():
                 d[level][panel_label] = \
@@ -76,7 +69,7 @@ class ThousandGenomes:
 
     @classmethod
     def all_samples(cls):
-        samples = pd.read_table(join(cls.BASE_DIR, cls.SAMPLES_FILENAME))
+        samples = pd.read_table(cls.SAMPLES_FILENAME)
         rename = {'pop': 'population', 'super_pop': 'superpopulation'}
         samples = samples.rename(columns=rename).dropna(axis=1, how='all')
         return samples.set_index('sample')
@@ -89,24 +82,4 @@ class ThousandGenomes:
         df = df.pivot_table(values="MAF", index="SNP", columns="CLST")
         df = df.applymap(lambda freq: 1 - freq if freq > 0.5 else freq)
         return df
-
-
-    @staticmethod
-    def _filter_by_sample_ids(df, sample_ids):
-        if sample_ids is None:
-            return df
-
-        # Assumes samples are indices
-        common_sample_ids = df.index.intersection(sample_ids)
-        return df.loc[common_sample_ids]
-
-
-    @staticmethod
-    def _filter_by_rs_ids(df, rs_ids):
-        if rs_ids is None:
-            return df
-
-        # Assumes rs ids are columns
-        common_rs_ids = df.columns.intersection(rs_ids)
-        return df[common_rs_ids]
 

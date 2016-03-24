@@ -1,3 +1,4 @@
+import vcf
 import pandas as pd
 
 from os.path import join, expanduser, isfile
