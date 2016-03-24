@@ -5,12 +5,14 @@ sys.path.insert(0, os.path.abspath("../sources"))
 
 
 from pandas import Series
+from os.path import join, expanduser
 from collections import OrderedDict
 from sources.thousand_genomes import ThousandGenomes
 from helpers.general_helpers import load_yaml
 
 
 class Dataset:
+
     def __init__(self, label):  # L, LE, LEA, LEAC ..
         self.label = label
         self.name = self.make_name(label)
@@ -23,6 +25,37 @@ class Dataset:
     def __repr__(self):
         template =  "<Dataset {} of {} populations, {} samples>"
         return template.format(self.label, len(self.pop_codes), len(self.sample_ids))
+
+
+    def write_samples_file(self, dest_dir):
+        """
+        Will write a file with one sample id per line.
+        Plink can take that file with the --keep-fam flag, for instance.
+        """
+        filename = join(dest_dir, "{}.samples".format(self.label))
+        with open(filename, "w") as f:
+            for sample_id in self.sample_ids:
+                f.write(sample_id + "\n")
+
+
+    def write_clusters_files(self, dest_dir):
+        """
+        Will write a file with three columns: FID, IID, and cluster info, for
+        use with plink (cluster info is used for Fst).
+        """
+        samples_info = self._thousand_genomes.all_samples().ix[self.sample_ids]
+        # Family ID (FID), Within-family ID (IID), Cluster ID
+        filenames = []
+        for level in ["population", "superpopulation"]:
+            df = samples_info.reset_index()
+            df["FID"] = df["sample"]
+            df = df[["FID", "sample", level]]
+            filename = "{}.{}.clusters".format(self.label, level)
+            df.to_csv(join(dest_dir, filename), sep="\t", header=None,
+                      index=False)
+            filenames.append(filename)
+
+        return filenames
 
 
     @classmethod

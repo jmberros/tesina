@@ -48,7 +48,7 @@ class AdmixtureResults:
             samples_df = ThousandGenomes().all_samples
             ancestries_df = samples_df.join(ancestries_df).dropna()
 
-            continents_present = len(ancestries_df["super_population"].unique())
+            continents_present = len(ancestries_df["superpopulation"].unique())
             if continents_present >= 3:
                 self.infer_ancestral_components_from_samples_origin(ancestries_df)
 
@@ -76,7 +76,7 @@ class AdmixtureResults:
 
 
     def infer_ancestral_components_from_samples_origin(self, ancestries_df):
-        means = ancestries_df.groupby("super_population").mean()
+        means = ancestries_df.groupby("superpopulation").mean()
         max_continent_per_component = means.idxmax(axis=0).to_dict()
         max_component_per_continent = means.idxmax(axis=1).to_dict()
 

@@ -18,7 +18,7 @@ class ThousandGenomes:
         df = pd.read_table(filename, index_col="SNP").transpose()
         df.index.name, df.columns.name = "sample", "rs_id"
         samples = self._filter_by_sample_ids(self.all_samples, df.index)
-        multi_index = ["super_population", "population", "gender", "sample"]
+        multi_index = ["superpopulation", "population", "gender", "sample"]
         df = samples.join(df).reset_index().set_index(multi_index)
 
         return df.sort_index()
@@ -77,7 +77,7 @@ class ThousandGenomes:
     @classmethod
     def all_samples(cls):
         samples = pd.read_table(join(cls.BASE_DIR, cls.SAMPLES_FILENAME))
-        rename = {'pop': 'population', 'super_pop': 'super_population'}
+        rename = {'pop': 'population', 'super_pop': 'superpopulation'}
         samples = samples.rename(columns=rename).dropna(axis=1, how='all')
         return samples.set_index('sample')
 
