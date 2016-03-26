@@ -11,17 +11,19 @@ from collections import OrderedDict
 from os.path import expanduser, join, basename, isfile
 from glob import glob
 
+from .source import Source
 from sources.thousand_genomes import ThousandGenomes
 from sources.max_plank import MaxPlank
 
 
 class Panel:
     THOUSAND_GENOMES_DIR = expanduser("~/tesina/1000Genomes/all_panels")
-    PANEL_INFO_DIR = expanduser("~/tesina/panel_info_files")
+    BASE_DIR = expanduser("~/tesina/panel_info_files")
     SOURCES = {
         "1000G": ThousandGenomes,
         "MaxPlank": MaxPlank,
     }
+
 
     def __init__(self, label):
         """
@@ -29,12 +31,12 @@ class Panel:
         <label>.csv info file about the SNPs in the panel.
         """
         self.label = label
-        bim_file = join(self.THOUSAND_GENOMES_DIR, label + ".bim")
+        bim_file = join(self.BASE_DIR, label + ".bim")
         self.snps = self.read_bim(bim_file)
         self.rs_ids = self.snps.index.values  # Redundant, but handy shortcut
         self.name = self._generate_name()
 
-        info_file = join(self.PANEL_INFO_DIR, label + ".csv")
+        info_file = join(self.BASE_DIR, label + ".csv")
         if isfile(info_file):
             self.extra_info = self.read_info(info_file)
 
@@ -56,7 +58,7 @@ class Panel:
 
         # The three ":, :, :" are for a MultiIndex with levels:
         # superpopulation, population, gender, sample
-        slicer = pd.IndexSlice[:, :, :, dataset.sample_ids]
+        slicer = pd.IndexSlice[:, :, dataset.sample_ids]
         return self.genotypes_cache[source_label].loc[slicer, :]
 
 
@@ -84,7 +86,7 @@ class Panel:
         snps_with_genotype = self.extra_info.loc[rs_ids_with_genotypes]
         snps_with_genotype.sort_values(sort_key, ascending=False, inplace=True)
         subpanel = snps_with_genotype.ix[:length, :]
-        filename = join(self.PANEL_INFO_DIR, new_label)
+        filename = join(self.BASE_DIR, new_label)
         subpanel.to_csv(filename + ".csv",
                         index_label=self.extra_info.index.name)
         np.savetxt(filename + ".snps", subpanel.index.values, fmt="%s")

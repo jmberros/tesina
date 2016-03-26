@@ -12,18 +12,21 @@ from components.source import Source
 class MaxPlank(Source):
     BASE_DIR = expanduser("~/tesina/HGDP/MaxPlank_04_supp3")
     LABEL = join(BASE_DIR, "hgdpceph.affy500k")
-    SAMPLES_FILENAME = join(BASE_DIR, "../HGDP_populations.csv")
+    POPULATIONS_FILENAME = join(BASE_DIR, "../HGDP_populations.csv")
+    SAMPLES_FILENAME = join(BASE_DIR, "hgdpceph.affy500k.pedind")
 
     @classmethod
     def populations(cls):
-        return pd.read_csv(cls.SAMPLES_FILENAME)
+        return pd.read_csv(cls.POPULATIONS_FILENAME, index_col="population")
 
 
     @classmethod
     def samples(cls):
+        columns = ["ix", "sample", "fid", "iid", "phen", "population"]
+        df = pd.read_table(cls.SAMPLES_FILENAME, names=columns, sep="\s+",
+                           usecols=["sample", "population"], skiprows=1)
+        continent_info = cls.populations()["superpopulation"].to_frame()
+        df = df.merge(continent_info, left_on="population", right_index=True)
+        return df.set_index("sample")
 
-        #  rename = {'Unknown': 'population', 'super_pop': 'superpopulation'}
-        #  samples = samples.rename(columns=rename).dropna(axis=1, how='all')
-        #  return samples.set_index('sample')
-        return samples
 

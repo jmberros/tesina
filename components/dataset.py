@@ -50,7 +50,7 @@ class Dataset:
             df = samples_info.reset_index()
             df["FID"] = df["sample"]
             df = df[["FID", "sample", level]]
-            filename = "{}.{}.clusters".format(self.label, level)
+            filename = "{}.{}.clst".format(self.label, level)
             df.to_csv(join(dest_dir, filename), sep="\t", header=None,
                       index=False)
             filenames.append(filename)

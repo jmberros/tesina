@@ -19,13 +19,13 @@ class ThousandGenomes(Source):
 
     def samples_from_pop_codes(self, pop_codes):
         # Assumes pop_code as a column.
-        missing = setdiff1d(pop_codes, self.all_samples()["population"])
+        missing = setdiff1d(pop_codes, self.samples()["population"])
         if len(missing) > 0:
             raise ValueError("Couldn't find populations: {}".format(missing))
 
         # Turn population into index temporarily to get the desired samples
         # *in the order of the pop_codes*. Then set the original index back.
-        filtered = self.all_samples().reset_index().set_index("population").loc[pop_codes]
+        filtered = self.samples().reset_index().set_index("population").loc[pop_codes]
         return filtered.reset_index().set_index("sample").dropna()
 
 
@@ -42,7 +42,7 @@ class ThousandGenomes(Source):
 
 
     @classmethod
-    def population_names(cls):
+    def populations(cls):
         if isfile(cls.POP_NAMES_FILE):
             return pd.read_csv(cls.POP_NAMES_FILE, index_col="population")
 
@@ -68,10 +68,11 @@ class ThousandGenomes(Source):
     # --- Helper internal methods ---
 
     @classmethod
-    def all_samples(cls):
+    def samples(cls):
         samples = pd.read_table(cls.SAMPLES_FILENAME)
         rename = {'pop': 'population', 'super_pop': 'superpopulation'}
         samples = samples.rename(columns=rename).dropna(axis=1, how='all')
+        samples.drop("gender", axis=1, inplace=True)
         return samples.set_index('sample')
 
 
