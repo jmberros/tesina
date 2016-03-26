@@ -7,8 +7,9 @@ sys.path.insert(0, os.path.abspath("../sources"))
 from pandas import Series
 from os.path import join, expanduser
 from collections import OrderedDict
-from sources.thousand_genomes import ThousandGenomes
 from helpers.general_helpers import load_yaml
+from sources.thousand_genomes import ThousandGenomes
+from sources.max_plank import MaxPlank
 
 
 class Dataset:
@@ -19,12 +20,16 @@ class Dataset:
         self._thousand_genomes = ThousandGenomes()
         self.pop_codes = self.populations_per_dataset(label)
         self.continents = list(self.label)  # Depends on the naming convention
-        self.sample_ids = self._thousand_genomes.samples_from_pop_codes(self.pop_codes).index
 
 
     def __repr__(self):
         template =  "<Dataset {} of {} populations, {} samples>"
         return template.format(self.label, len(self.pop_codes), len(self.sample_ids))
+
+
+    def sample_ids(self):
+        self.sample_ids = self._thousand_genomes.samples_from_pop_codes(self.pop_codes).index
+
 
 
     def write_samples_file(self, dest_dir):

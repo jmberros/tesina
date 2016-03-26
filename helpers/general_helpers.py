@@ -2,10 +2,11 @@ import yaml
 
 from datetime import datetime
 from collections import OrderedDict
+from os.path import join
 
 
 def load_yaml(fn):
-    with open(fn, "r") as f:
+    with open(join("./settings", fn), "r") as f:
         dic = yaml.load(f)
     return dic
 

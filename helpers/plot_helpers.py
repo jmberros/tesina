@@ -59,16 +59,16 @@ def ancestral_components_order(K):
 
 
 def population_markers(population_code):
-    return load_yaml("./settings/population_markers.yml")[population_code]
+    return load_yaml("population_markers.yml")[population_code]
 
 
 def population_colors(population_code=None):
-    dic = load_yaml("./settings/population_colors.yml")
+    dic = load_yaml("population_colors.yml")
     return dic[population_code] if population_code else dic
 
 
 def panel_colors(key=None):
-    d = load_yaml("./settings/panel_colors.yml")
+    d = load_yaml("panel_colors.yml")
     if key:
         return d[key]
     else:

@@ -1,0 +1,20 @@
+# NameOfSource:
+#   directory: folder where the rest of the files will be looked for
+#   populations_file: a csv with population, superpopulation, description fields
+#   samples_file: a tab separated file with sample, population, superpopulation fields
+
+1000Genomes:
+    directory: ~/tesina/1000Genomes
+    populations_file: 1000G_populations.csv
+    samples_file: integrated_call_samples_v3.20130502.ALL.panel
+
+    pop_frequencies_template: galanter_beds/{}.{}.frq.strat  # Improve this
+
+MaxPlank:
+    directory: ~/tesina/HGDP/MaxPlank_04_supp3
+    populations_file: HGDP_populations.csv
+    samples_file: hgdpceph.affy500k.ALL.panel
+
+    plink_label: hgdpceph.affy500k
+    # pop_frequencies_template: .......?
+
