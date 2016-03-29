@@ -45,8 +45,7 @@ class MAFPlotter:
 
 
     def _boxplot_aesthetics(self, ax, legend_on=False):
-        title = "\n".join(["MAF promedio por población",
-                           "según muestras de 1000 Genomas"])
+        title = "\n".join(["MAF promedio por población"])
         ax.set_title(title, y=1.08, fontweight="bold")
         ax.set_ylabel("Frecuencia del alelo menor")
         ax.set_xlabel("")

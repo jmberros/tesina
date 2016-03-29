@@ -14,13 +14,14 @@ class ThousandGenomes:
 
 
     def read_traw(self, label):
-        filename = join(self.TRAW_DIR, "{}.traw.parsed".format(label))
-        df = pd.read_table(filename, index_col="SNP").transpose()
-        df.index.name, df.columns.name = "sample", "rs_id"
-        samples = self._filter_by_sample_ids(self.all_samples, df.index)
-        multi_index = ["superpopulation", "population", "gender", "sample"]
-        df = samples.join(df).reset_index().set_index(multi_index)
-
+        filename = join(self.TRAW_DIR, "{}.traw".format(label))
+        df = pd.read_table(filename, index_col="SNP")
+        df.drop(["CHR", "(C)M", "POS", "COUNTED", "ALT"], axis=1, inplace=True)
+        df.columns = [iid_fid.split("_")[1] for iid_fid in df.columns]
+        df.columns.name, df.index.name = "sample", "rs_id"
+        multi_index = ["superpopulation", "population", "sample"]
+        df = self.all_samples().join(df.T).reset_index().set_index(multi_index)
+        df = df.drop("gender", axis=1)
         return df.sort_index()
 
 

@@ -6,7 +6,6 @@ from .panel import Panel
 from pandas import DataFrame, Series
 from collections import defaultdict
 from matplotlib import cm
-from helpers.data_munging_functions import annotate_bars
 from helpers.general_helpers import thousands_separator, ratio_to_percentage
 
 
@@ -73,51 +72,6 @@ class PanelAnalyser:
 
         return pd.concat([galanter_snp_distances_stats,
                         present_snp_distances_stats], axis=1)
-
-
-    def galanter_vs_present_mean_distance_plot(self, galanter, present, genome):
-        df = snp_distances(galanter, present, genome)
-        df = df[['mean_distance_galanter', 'mean_distance_present']]
-
-        ax = df.plot(kind='bar', rot=0, width=0.75, colormap=cm.coolwarm_r,
-                    alpha=0.65)
-        ax.set_title(r"Distancia media entre AIMs en $Galanter_{IN}$ " +
-                    "vs. $Galanter_{TOTAL}$", y=1.05)
-        ax.set_ylabel("Distancia (Mb)")
-        ax.set_xlabel("Cromosoma")
-
-        annotate_bars(ax, base=10**6, decimals=1)
-
-        yrange = range(0, 30, 2)
-        millions = np.array(yrange) * 10**6
-        ax.set_yticks(millions)
-        ax.set_yticklabels(yrange)  # Display as Mbp
-        ax.legend([r"$Galanter_{TOTAL}$", r"$Galanter_{IN}$", ], loc='best')
-
-        return ax
-
-
-    def galanter_vs_present_median_distance_plot(self, galanter, present, genome):
-        df = snp_distances(galanter, present, genome)
-        df = df[['median_distance_galanter', 'median_distance_present']]
-
-        ax = df.plot(kind="bar", rot=0, colormap=cm.coolwarm_r, alpha=0.65,
-                    width=0.75)
-        ax.set_title(r"Mediana de las distancias entre AIMs en $Galanter_{IN}$ " +
-                    "y $Galanter_{TOTAL}$", y=1.05)
-        ax.set_ylabel("Distancia (Mb)")
-        ax.set_xlabel("Cromosoma")
-
-        annotate_bars(ax, base=10**6, decimals=1, fontsize=10)
-
-        yrange = range(0, 30, 2)
-        millions = np.array(yrange) * 10**6
-        ax.set_yticks(millions)
-        ax.set_yticklabels(yrange)  # Display as Mbp
-        ax.legend([r"Mediana de las distancias en $Galanter_{TOTAL}$",
-                r"Mediana de las distancias en $Galanter_{IN}$"], loc='best')
-
-        return ax
 
 
     def _distances_between_markers(self, positions, chromosome, genome):

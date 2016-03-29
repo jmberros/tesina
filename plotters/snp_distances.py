@@ -115,7 +115,7 @@ class SnpDistances:
 
 
     def _generate_distances_long_format(self):
-        genome = create_genome_df()
+        genome = Genome.regions()
         panel_analyser = PanelAnalyser()
         frames = [panel_analyser.snp_distances_per_chromosome(panel, genome)
                   for panel in Panel.all_panels()]
