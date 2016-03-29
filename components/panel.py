@@ -52,6 +52,14 @@ class Panel:
         return self.genotypes_cache.loc[slicer, :]
 
 
+    def allele_freqs(self, level="population"):
+        genotypes = self.genotypes_1000G()
+        allele_freqs = genotypes.groupby(level=level).sum()
+        total_obs = genotypes.count() * 2
+        return total_obs
+
+
+
     def _generate_name(self):
         return "{0} · {1:,} SNPs".format(self.label, len(self.rs_ids))
 
