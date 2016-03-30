@@ -16,7 +16,7 @@ PLOTS_DIR = expanduser("~/tesina/charts/panel_analyses")
 
 
 class SnpDistances:
-    FIGSIZE = (15, 4)
+    FIGSIZE = (15, 3.5)
 
     def __init__(self):
         makedirs(PLOTS_DIR, exist_ok=True)
