@@ -5,7 +5,6 @@ import seaborn as sns
 
 from os import makedirs
 from os.path import join, expanduser
-from collections import OrderedDict
 
 from components.panel import Panel
 from components.panel_analyser import PanelAnalyser
@@ -15,10 +14,12 @@ from helpers.plot_helpers import panel_colors, hide_spines_and_ticks
 
 PLOTS_DIR = expanduser("~/tesina/charts/panel_analyses")
 
+
 class SnpDistances:
+    FIGSIZE = (15, 4)
+
     def __init__(self):
         makedirs(PLOTS_DIR, exist_ok=True)
-
 
     def snp_distances_comparison_boxplot(self, panel_labels):
         distances_long_format = self._generate_distances_long_format()
@@ -38,8 +39,7 @@ class SnpDistances:
         self._boxplot_aesthetics(ax)
         plt.show()
 
-
-    def chromosomes_with_SNPs_plot(self, panel):
+    def chromosomes_with_SNPs_plot(self, panel, xlabels_on=True):
         genome = Genome.regions()
         fig, ax = plt.subplots()
         chrom_linewidth = 0.75
@@ -56,20 +56,23 @@ class SnpDistances:
                     lw=chrom_linewidth)
 
         # SNPs
-        panel.snps.plot(ax=ax, kind="scatter", x="chr", y="position", lw=0.5,
-                      title=panel.name)
+        panel.snps.plot(ax=ax, kind="scatter", x="chr", y="position", lw=1,
+                        s=120, color="black", marker="_")
 
-        ax= self._chromosomes_plot_aesthetics(ax, genome)
+        ax = self._chromosomes_plot_aesthetics(ax, genome)
+        if not xlabels_on:
+            ax.set_xticklabels([])
+            ax.set_xlabel("")
 
-        filename = "chromosomes_with_SNPs__{}".format(panel.name)
+        filename = "chromosomes_with_SNPs__{}".format(panel.label)
         filepath = join(PLOTS_DIR, filename)
+        print(filepath)
         plt.savefig(filepath, bbox_inches="tight")
 
         return ax
 
-
     def _chromosomes_plot_aesthetics(self, ax, genome):
-        plt.gcf().set_size_inches(14, 6)
+        plt.gcf().set_size_inches(self.FIGSIZE)
 
         max_len = genome["chr_length"].max()
         hide_spines_and_ticks(ax)
@@ -93,11 +96,9 @@ class SnpDistances:
         ax.set_yticks(yticks)
         yticklabels = np.arange(0, max_len + yinterval, yinterval) // 10**6
         ax.set_yticklabels([l for l in yticklabels if l % 50 == 0])
-
-        legend = ax.legend(loc="best", scatterpoints=1)
+        ax.legend(loc="best", scatterpoints=1)
 
         return ax
-
 
     def _boxplot_aesthetics(self, ax):
         ax.set_title("Distancia media entre AIMs", y=1.08, fontweight="bold")
@@ -112,7 +113,6 @@ class SnpDistances:
 
         ax.yaxis.grid(linestyle="dotted")
         hide_spines_and_ticks(ax)
-
 
     def _generate_distances_long_format(self):
         genome = Genome.regions()
