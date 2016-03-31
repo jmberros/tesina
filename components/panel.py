@@ -6,7 +6,6 @@ sys.path.insert(0, os.path.abspath("../sources"))
 import numpy as np
 import pandas as pd
 
-from collections import OrderedDict
 from os.path import expanduser, join, basename, isfile
 from glob import glob
 from sources.thousand_genomes import ThousandGenomes
@@ -34,10 +33,8 @@ class Panel:
 
         self.genotypes_1000G_cache = None
 
-
     def __repr__(self):
         return '<"{}" with {} SNPs>'.format(self.label, len(self.rs_ids))
-
 
     def genotypes_1000G(self, dataset=None):
         if self.genotypes_1000G_cache is None:
@@ -48,21 +45,26 @@ class Panel:
 
         # The three ":, :, :" are for a MultiIndex with levels:
         # superpopulation, population, gender, sample
-        slicer = pd.IndexSlice[:, :, :, dataset.sample_ids]
+        slicer = pd.IndexSlice[:, :, dataset.sample_ids]
         return self.genotypes_cache.loc[slicer, :]
-
 
     def allele_freqs(self, level="population"):
         genotypes = self.genotypes_1000G()
-        allele_freqs = genotypes.groupby(level=level).sum()
+        # allele_freqs = genotypes.groupby(level=level).sum()
         total_obs = genotypes.count() * 2
         return total_obs
 
-
-
     def _generate_name(self):
-        return "{0} · {1:,} SNPs".format(self.label, len(self.rs_ids))
+        if "_from_" in self.label:  # Subpanel
+            name = self.label.replace("_", " ")
+        else:
+            name = "{0} · {1:,} SNPs".format(self.label, len(self.rs_ids))
 
+        is_AIMs_panel = ("GAL" in self.label)
+        if is_AIMs_panel:
+            name = name.replace("SNPs", "AIMs")
+
+        return name
 
     def generate_subset_SNP_list(self, length, sort_key="LSBL(Fst)"):
         """
@@ -82,7 +84,6 @@ class Panel:
 
         return filename
 
-
     @staticmethod
     def read_bim(filename):
         bim_fields = ["chr", "rs_id", "phen", "position", "A1", "A2"]
@@ -90,11 +91,9 @@ class Panel:
                            usecols=["chr", "rs_id", "position"])
         return df
 
-
     @staticmethod
     def read_info(filename):
         return pd.read_csv(filename, index_col="rs_id")
-
 
     @classmethod
     def panel_groups(cls):
@@ -104,7 +103,6 @@ class Panel:
             "subpanels": cls.all_subpanels()
         }
 
-
     @classmethod
     def all_panels_and_subpanels(cls):
         glob_expr = join(cls.THOUSAND_GENOMES_DIR, "*.bim")
@@ -113,17 +111,15 @@ class Panel:
 
         gal_panels = [label for label in labels if "GAL" in label]
         control_panels = [label for label in labels if "CPx" in label]
-        subpanels = [label for label in labels if "_from_" in label
-                     and not label in gal_panels + control_panels]
+        subpanels = [label for label in labels if "_from_" in label and
+                     label not in gal_panels + control_panels]
 
         return [cls(label) for label in gal_panels + control_panels + subpanels]
-
 
     @classmethod
     def all_panels(cls):
         return [panel for panel in cls.all_panels_and_subpanels()
                 if "GAL" in panel.label and "_from_" not in panel.label]
-
 
     @classmethod
     def all_subpanels(cls, label=None):
@@ -133,7 +129,6 @@ class Panel:
             subpanels = [sp for sp in subpanels if label in sp.label]
         subpanels.sort(key=lambda p: len(p.rs_ids), reverse=True)
         return subpanels
-
 
     @classmethod
     def all_control_panels(cls):

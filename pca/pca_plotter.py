@@ -4,9 +4,7 @@ import numpy as np
 from math import ceil
 from os import makedirs
 from os.path import join, expanduser
-from pandas import DataFrame
 from sources.thousand_genomes import ThousandGenomes
-from .pca_generator import PCAGenerator
 from helpers import plot_helpers
 from helpers.plot_helpers import legend_subplot, grey_spines
 
@@ -14,7 +12,6 @@ from helpers.plot_helpers import legend_subplot, grey_spines
 class PCAPlotter:
     FIGS_DIR = expanduser("~/tesina/charts/PCAs")
     PLOT_SIZE = (6, 5)
-
 
     def draw_ax(self, ax, components_to_compare, components_df,
                 explained_variance, reference_population, title):
@@ -33,7 +30,7 @@ class PCAPlotter:
             x = components[components_to_compare[0]]
             y = components[components_to_compare[1]]
             ax.scatter(x, y, lw=lw, label=pop_code, marker=marker,
-                        c=color, zorder=z, s=50, alpha=0.65)
+                       c=color, zorder=z, s=30, alpha=0.65)
 
             # Define inversion of axis to align components across plots
             # Keep the reference population in the upper left
@@ -52,20 +49,24 @@ class PCAPlotter:
                     ax.invert_yaxis()
                     ylabel_prefix = "–"
 
-        ax.set_xlabel("{}{}: {}%".format(xlabel_prefix,
-            components_to_compare[0],
-            explained_variance.ix[components_to_compare[0]]))
-        ax.set_ylabel("{}{}: {}%".format(ylabel_prefix,
-            components_to_compare[1],
-            explained_variance.ix[components_to_compare[1]]))
-        ax.set_title(title)
+        xcomponent, ycomponent = components_to_compare
+        xvariance = explained_variance.ix[xcomponent]
+        xlabel = "{}{}: {}%".format(xlabel_prefix, xcomponent, xvariance)
+        ax.set_xlabel(xlabel)
+
+        yvariance = explained_variance.ix[ycomponent]
+        ylabel = "{}{}: {}%".format(ylabel_prefix, ycomponent, yvariance)
+        ax.set_ylabel(ylabel)
+
+        if title:
+            ax.set_title(title, fontweight="bold")
+
         self._pca_plot_aesthetics(ax)
 
         return ax
 
-
     def plot_(self, components_df, explained_variance, title, filename,
-             component_pairs=[("PC1", "PC2")], plot_size=None):
+              component_pairs=[("PC1", "PC2")], plot_size=None):
 
         # + 1 axes for the one with the legend, +1 because index starts at 1
         ax_ids = list(np.arange(1, len(component_pairs) + 2))
@@ -76,12 +77,12 @@ class PCAPlotter:
             ax_id = ax_ids.pop(0)
             ax = fig.add_subplot(nrows, ncols, ax_id)
             ax = self.draw_ax(ax, components_to_compare, components_df,
-                              explained_variance)
+                              explained_variance, "PEL", title)
 
         # Legend subplot. It will use the handles and labels of the last ax
         handles, labels = ax.get_legend_handles_labels()
         populations_df = ThousandGenomes.population_names()
-        descriptions = populations_df.ix[labels, "Population Description"]
+        descriptions = populations_df.ix[labels, "description"]
         legend_labels = [" - ".join([code, desc])
                          for code, desc in descriptions.iteritems()]
 
@@ -98,7 +99,6 @@ class PCAPlotter:
             plt.savefig(join(self.FIGS_DIR, filename), facecolor="w",
                         bbox_inches="tight")
 
-
     def _pca_plot_aesthetics(self, ax):
         plot_helpers.hide_spines_and_ticks(ax, spines="all")
         ax.tick_params(axis="x", bottom="off", top="off", labelbottom="off")
@@ -106,7 +106,6 @@ class PCAPlotter:
         grey_spines(ax)
 
         return ax
-
 
     def _fig_dimensions(self, number_of_plots, plot_size):
         plot_width, plot_height = self.PLOT_SIZE
@@ -122,4 +121,3 @@ class PCAPlotter:
         fig_height = plot_height * nrows
 
         return nrows, ncols, (fig_width, fig_height)
-

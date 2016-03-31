@@ -32,6 +32,12 @@ def legend_subplot(ax, handles, labels):
     ax.set_axis_bgcolor("white")
     ax.legend_.get_frame().set_facecolor("white")
 
+    empty_subplot(ax)
+
+    return ax
+
+
+def empty_subplot(ax):
     for loc in ['top', 'bottom', 'left', 'right']:
         ax.spines[loc].set_visible(False)
 
@@ -39,7 +45,6 @@ def legend_subplot(ax, handles, labels):
     ax.set_yticklabels([])
     ax.set_xticks([])
     ax.set_yticks([])
-
     return ax
 
 
@@ -79,4 +84,3 @@ def grey_spines(ax):
     for spine in ax.spines.values():
         spine.set_edgecolor("silver")
     return ax
-
