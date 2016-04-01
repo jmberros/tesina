@@ -66,7 +66,7 @@ class PCAPlotter:
         return ax
 
     def plot_(self, components_df, explained_variance, title, filename,
-              component_pairs=[("PC1", "PC2")], plot_size=None):
+              component_pairs=[("PC1", "PC2")], plot_size=None, legend_on=True):
 
         # + 1 axes for the one with the legend, +1 because index starts at 1
         ax_ids = list(np.arange(1, len(component_pairs) + 2))
@@ -79,15 +79,16 @@ class PCAPlotter:
             ax = self.draw_ax(ax, components_to_compare, components_df,
                               explained_variance, "PEL", title)
 
-        # Legend subplot. It will use the handles and labels of the last ax
-        handles, labels = ax.get_legend_handles_labels()
-        populations_df = ThousandGenomes.population_names()
-        descriptions = populations_df.ix[labels, "description"]
-        legend_labels = [" - ".join([code, desc])
-                         for code, desc in descriptions.iteritems()]
+        if legend_on:
+            # Legend subplot. It will use the handles and labels of the last ax
+            handles, labels = ax.get_legend_handles_labels()
+            populations_df = ThousandGenomes.population_names()
+            descriptions = populations_df.ix[labels, "description"]
+            legend_labels = [" - ".join([code, desc])
+                            for code, desc in descriptions.iteritems()]
 
-        ax = fig.add_subplot(nrows, ncols, ax_ids.pop(0))
-        ax = legend_subplot(ax, handles, legend_labels)
+            ax = fig.add_subplot(nrows, ncols, ax_ids.pop(0))
+            ax = legend_subplot(ax, handles, legend_labels)
 
         #  plt.tight_layout()
         fig.suptitle(title, fontsize=18, position=(0.12, 1.1), ha="left",
