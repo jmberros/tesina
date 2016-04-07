@@ -3,14 +3,14 @@ import pandas as pd
 from os import popen
 from os.path import join, expanduser, isdir
 from itertools import product
-from pandas import DataFrame
-from collections import defaultdict, OrderedDict
+from collections import OrderedDict
 from sources.thousand_genomes import ThousandGenomes
 from components.dataset import Dataset
 from components.panel import Panel
 
 
 ADMIXTURE_DIR = expanduser("~/tesina/admixture")
+
 
 class AdmixtureResults:
 
@@ -45,7 +45,7 @@ class AdmixtureResults:
             ancestries_df.index = samples.index
 
             # Add population data to the sample IDs
-            samples_df = ThousandGenomes().all_samples
+            samples_df = ThousandGenomes().all_samples()
             ancestries_df = samples_df.join(ancestries_df).dropna()
 
             continents_present = len(ancestries_df["superpopulation"].unique())
@@ -65,15 +65,12 @@ class AdmixtureResults:
 
         return pd.concat(dataframes)
 
-
     def read_frequencies_files(self):
         pass
-
 
     def mean_ancestries_by_population(self, ancestries_df):
         df = ancestries_df.set_index("population", append=True)
         return df.groupby(level=df.index.names).mean()
-
 
     def infer_ancestral_components_from_samples_origin(self, ancestries_df):
         means = ancestries_df.groupby("superpopulation").mean()
@@ -86,7 +83,6 @@ class AdmixtureResults:
                 guesses[guessed_component] = continent
 
         ancestries_df.rename(columns=guesses, inplace=True)
-
 
     def infer_ancestral_components_from_reference_pop(self, ancestries_df):
         # Last resort after #infer_ancestral_components
@@ -113,7 +109,6 @@ class AdmixtureResults:
         if len(guess) > 0:
             ancestries_df.rename(columns=guess, inplace=True)
 
-
     def optimal_Ks(self):
         return OrderedDict([("L", 3),
                             ("LE", 3),
@@ -121,8 +116,7 @@ class AdmixtureResults:
                             ("LEAC", 4),
                             ("LEACI", 5)])
 
-
     def available_Ks(self):
-        command = "ls -R {} | grep '.*.Q' | ruby -F'\.' -lane 'puts $F[-2]' | sort | uniq".format(ADMIXTURE_DIR)
+        command = ("ls -R {} | grep '.*.Q' | ruby -F'\.' -lane 'puts $F[-2]'" +
+                   " | sort | uniq").format(ADMIXTURE_DIR)
         return [int(k) for k in popen(command).read().rstrip().split("\n")]
-

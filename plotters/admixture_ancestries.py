@@ -15,8 +15,8 @@ class AdmixtureAncestries:
     PER_SAMPLE_FIGSIZE = 18, 2.75
     PLOTS_DIR = expanduser("~/tesina/charts/ADMIXTURE/")
 
-    def plot_per_sample(self, dataset_label, K, panel_label,
-                        ancestries_df, show_plot=True, sort=True):
+    def plot_per_sample(self, dataset_label, K, panel_label, ancestries_df,
+                        title_on=True, show_plot=True, sort=True):
         # Filter the df for this dataset / K / panel
         df_lite = ancestries_df.loc[dataset_label, K, panel_label].dropna(axis=1)
 
@@ -45,18 +45,19 @@ class AdmixtureAncestries:
 
         ax.set_ylim([0, 1])
         self._plot_aesthetics(ax, plot_title)
+        if not title_on:
+            ax.set_title("")
         ax.legend_.set_visible(False)
 
         filepath = self._make_filepath(dataset_label, K, panel_label)
         plt.savefig(filepath + "__samples", bbox_inches="tight")
 
-        if show_plot:
-            plt.show()
-
         fig.clf()
 
-    def plot_population_means(self, dataset_label, K, panel_label,
-                              ancestries_df, show_plot=True):
+        return ax
+
+    def plot_population_means(self, dataset_label, K, panel_label, ancestries_df,
+                              show_plot=True, legend_on=True, title_on=True):
         # Filter the df for this dataset / K / panel
         df_lite = ancestries_df.loc[dataset_label, K, panel_label]
 
@@ -76,7 +77,15 @@ class AdmixtureAncestries:
 
         self._plot_aesthetics(ax, plot_title)
         sns.despine(top=True, left=True, right=True)
-        self._legend_aesthetics(ax, K)
+        if legend_on:
+            self._legend_aesthetics(ax, K)
+            ax.set_title(plot_title, y=1.05, family="serif")
+        else:
+            ax.legend_.set_visible(False)
+            ax.set_title(plot_title, family="serif")
+
+        if not title_on:
+            ax.set_title("")
 
         filepath = self._make_filepath(dataset_label, K, panel_label)
         plt.savefig(filepath + "__means", bbox_inches="tight")
@@ -92,16 +101,16 @@ class AdmixtureAncestries:
 
         fig.clf()  # Prevents memory leak when plotting in a loop
 
+        return ax
+
 
     def plot_all(self, ancestries_df=None):
         if ancestries_df is None:
             ancestries_df = AdmixtureResults().read_ancestry_files()
 
         for multi_index, df in ancestries_df.groupby(level=[0, 1, 2]):
-            self.plot_population_means(*multi_index, ancestries_df,
-                                       show_plot=False)
+            self.plot_population_means(*multi_index, ancestries_df, show_plot=False)
             self.plot_per_sample(*multi_index, ancestries_df, show_plot=False)
-
 
     def _reorder_populations_and_components(self, df, K):
         # Assuming poulations as indices and components as columns
@@ -111,7 +120,6 @@ class AdmixtureAncestries:
         df = df[components_order]
 
         return df
-
 
     def _generate_palette(self, ancestries):
         colors = []
@@ -125,39 +133,32 @@ class AdmixtureAncestries:
 
         return colors
 
-
     def _plot_aesthetics(self, ax, plot_title):
-        ax.set_title(plot_title, y=1.05, family="serif")
         ax.set_xlabel("")
         ax.set_xticklabels(ax.get_xticklabels(), rotation=0)
         ax.set_ylabel("Ancestrías")
         ax.set_yticklabels([])  # No need to state ratios exactly
         #  hide_spines_and_ticks(ax)
 
-
     def _legend_aesthetics(self, ax, K):
         ax.set_ylim([0, 1.5])  # Leave room for legend above axes
         ax.legend(loc="upper center", ncol=ceil(K/2))
         ax.legend_.set_title("Componentes inferidos")
 
-
     def _save_latex_table_to_disk(self, df, filepath):
         with open(filepath + ".latex-table", "w") as fp:
             fp.write(df.to_latex())
-
 
     def _make_title(self, dataset_label, K, panel_label):
         dataset_name = Dataset(dataset_label).name
         panel_name = Panel(panel_label).name
         return "{} - {} (K = {})".format(dataset_name, panel_name, K)
 
-
     def _make_filepath(self, dataset_label, K, panel_label):
         filename = "{}__{}__{}".format(dataset_label, panel_label, K)
         subdir = join(self.PLOTS_DIR, "{}__{}".format(panel_label, dataset_label))
         makedirs(subdir, exist_ok=True)
         return join(subdir, filename)
-
 
     def _round_ratio(self, ratio):
         return round(ratio, 2)

@@ -1,0 +1,139 @@
+\documentclass[a4paper, oneside, 11pt]{scrreprt}
+
+% == Packages
+\usepackage[a4paper,width=150mm,top=25mm,bottom=25mm]{geometry}  %
+
+\usepackage[utf8]{inputenc}
+\usepackage[spanish, es-tabla]{babel}
+\usepackage{graphicx, caption, subcaption}  % Keep this order and this first or subfigures break
+\usepackage{lmodern, color, booktabs, longtable, array, xcolor,
+            mathtools, afterpage, todonotes, csquotes, float, wrapfig,
+            hyperref, listings}
+\usepackage[activate={true,nocompatibility},final,tracking=true,kerning=true,
+            spacing=true,factor=1100,stretch=10,shrink=10]{microtype}
+% activate={true,nocompatibility} - activate protrusion and expansion
+% final - enable microtype; use "draft" to disable
+% tracking=true, kerning=true, spacing=true - activate these techniques
+% factor=1100 - add 10% to the protrusion amount (default is 1000)
+% stretch=10, shrink=10 - reduce stretchability/shrinkability (default is 20/20)
+\usepackage[backend=bibtex,style=numeric,citestyle=numeric,sorting=none]{biblatex}
+
+\graphicspath{ {charts/} }
+
+% Header and footer
+\usepackage{fancyhdr} %
+\pagestyle{fancy}
+\lhead{\thepage}
+\fancyfoot{}
+% \rhead{\nouppercase{\chaptermark}}
+
+% \fancyhead[RO,LE]{\thesection}  % 
+% \fancyfoot[CO,CE]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+% \renewcommand{\footrulewidth}{0.4pt}
+
+% == Bibliography external file
+\addbibresource{tesina.bib}
+
+% == Format code snippets
+\usepackage{minted}
+\usemintedstyle{perldoc}
+\definecolor{lightgray}{rgb}{0.97,0.97,0.97}
+\newminted{bash}{
+    fontsize=\footnotesize,
+    framesep=15pt,
+    frame=lines, % leftline
+    framerule=0,
+    funcnamehighlighting,
+    tabsize=4,
+    % linenos,
+    bgcolor=white
+}
+\newminted{python}{
+    fontsize=\footnotesize,
+    framesep=15pt,
+    frame=lines, % leftline
+    framerule=0,
+    funcnamehighlighting,
+    tabsize=4,
+    % linenos,
+    bgcolor=white
+}
+
+% == Boxing
+\fboxrule=1pt
+\fboxsep=0.5pt
+
+% == Figures & Captions
+\restylefloat{figure}  % for wrapfigure ?
+
+% \captionsetup{font=small, labelfont=bf, format=plain}
+% \captionsetup[subfloat]{position=top}
+\captionsetup{font=small, labelfont=bf, format=plain}
+\captionsetup[subfigure]{abovecaptionskip=5pt, belowcaptionskip=0pt, margin=10pt}
+\captionsetup[wrapfigure]{margin=10pt}
+\setlength{\wrapoverhang}{0.1\textwidth}
+\captionsetup[table]{belowcaptionskip=50pt}
+
+% == New Commands
+\newcommand*\mean[1]{\bar{#1}}
+\newcommand{\fst}{$F_{ST}$}
+\newcommand*\img[1]{\includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{#1}}
+\newcommand{\fig}[1]{\textbf{{\figurename} \ref{fig:#1}}}
+\newcommand{\tbl}[1]{\textbf{{\tablename} \ref{table:#1}}}
+\newcommand{\admixture}{\textit{admixture}}
+\newcommand{\plink}{\textit{plink}}
+\newcommand{\etal}{\textit{et al.}}
+\newcommand{\mono}[1]{\colorbox{light-gray}{\texttt{#1}}}
+
+\newcommand{\pop}[1]{\mono{#1}}
+\newcommand{\file}[1]{\mono{#1}}
+\newcommand{\dataset}[1]{\mono{#1}}
+
+\newcommand{\panel}[1]{\mono{#1}}
+\newcommand{\galcompleto}{\panel{GAL\_Completo}}
+\newcommand{\galaffy}{\panel{GAL\_Affy}}
+\newcommand{\cpx}{\panel{CPx1}}
+\newcommand{\cpxx}{\panel{CPx10}}
+\newcommand{\cpxxx}{\panel{CPx100}}
+
+\definecolor{light-gray}{gray}{0.95}
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+
+\title{
+Análisis de un panel de marcadores de información de ancestría para la caracterización de poblaciones latinoamericanas}
+\date{2016-03-24}
+\author{Juan Manuel Berros}
+% \institution{Universidad CAECE}
+% \location{Ciudad Autónoma de Buenos Aires}
+% \note{Director: Dr. Hernán Dopazo}
+
+\begin{document}
+
+\maketitle
+\pagenumbering{gobble}
+
+\newpage
+\tableofcontents
+\newpage
+\pagenumbering{arabic}
+
+% \chapter{Introducción} \label{chap:intro}
+% \input{chapters/introduccion}
+
+% \chapter{Materiales y Métodos} \label{chap:MyM}
+% \input{chapters/materiales_y_metodos}
+
+\chapter{Resultados}
+\input{chapters/resultados}
+
+% \chapter{Conclusiones}
+% \input{chapters/conclusiones}
+
+\newpage
+\printbibliography
+
+\end{document}
